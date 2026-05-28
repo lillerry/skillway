@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SkillWay | Образовательная платформа</title>
+    <meta name="description" content="SkillWay — платформа для записи на курсы и мастер-классы">
+    <meta name="theme-color" content="#ffffff">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #preloader { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s; z-index:10000; }
+        .preloader-spinner { width:40px; height:40px; border:2px solid var(--border); border-top-color:var(--primary-dark); border-radius:50%; animation:spin 0.6s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .course-image img, .hero-image { width:100%; height:100%; object-fit:cover; display:block; }
+    </style>
+</head>
+<body>
+
+<div id="preloader"><div class="preloader-spinner"></div></div>
+
+<header class="header" id="header">
+    <div class="container">
+        <div class="header-row">
+            <a href="#" class="logo" onclick="navigateTo('home'); return false;">Skill<span>Way</span></a>
+            <nav class="nav-menu" id="navMenu">
+                <a href="#" onclick="navigateTo('home'); return false;" class="nav-link active">Главная</a>
+                <a href="#" onclick="navigateTo('courses'); return false;" class="nav-link">Курсы</a>
+                <a href="#" onclick="navigateTo('masterclasses'); return false;" class="nav-link">Мастер-классы</a>
+                <a href="#" onclick="navigateTo('about'); return false;" class="nav-link">О нас</a>
+                <a href="#" onclick="navigateTo('reviews'); return false;" class="nav-link">Отзывы</a>
+                <a href="#" onclick="navigateTo('contacts'); return false;" class="nav-link">Контакты</a>
+                <a href="#" onclick="navigateTo('support'); return false;" class="nav-link">Поддержка</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-switch" id="themeSwitch"><i class="fas fa-moon"></i></button>
+                <div class="auth-block" id="authBlock"></div>
+                <button class="mobile-toggle" id="mobileToggle"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- Главная страница -->
+    <div id="home-page" class="page active">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <div class="hero-badge">Онлайн-запись на обучение</div>
+                        <h1 class="hero-title">Записывайтесь на <span class="hero-accent">курсы и мастер-классы</span> онлайн</h1>
+                        <p class="hero-description">SkillWay — платформа для удобной записи на образовательные курсы и мастер-классы от ведущих экспертов. Выбирайте программу, оформляйте заявку и начинайте обучение.</p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary" onclick="navigateTo('courses')"><i class="fas fa-graduation-cap"></i> Записаться на курс</button>
+                            <button class="btn btn-outline" onclick="navigateTo('masterclasses')"><i class="fas fa-chalkboard-user"></i> Мастер-классы</button>
+                        </div>
+                        <div class="hero-stats" id="heroStats"></div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="hero-image-wrapper">
+                            <img src="images/hero-img.jpg" alt="SkillWay обучение" class="hero-image" onerror="this.src='https://placehold.co/600x450/2dd4bf/ffffff?text=SkillWay'">
+                            <div class="hero-stats-card">
+                                <div class="stat-item"><i class="fas fa-video"></i><span>150+</span><small>курсов</small></div>
+                                <div class="stat-item"><i class="fas fa-users"></i><span>10k+</span><small>студентов</small></div>
+                                <div class="stat-item"><i class="fas fa-star"></i><span>4.9</span><small>рейтинг</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">Почему выбирают нас</span>
+                    <h2 class="section-title">Преимущества записи через SkillWay</h2>
+                    <p class="section-subtitle">Мы создали удобную систему для поиска и записи на обучение</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card"><div class="feature-icon"><i class="fas fa-mouse-pointer"></i></div><h3>Удобная запись</h3><p>Оформляйте заявку на обучение в несколько кликов</p></div>
+                    <div class="feature-card"><div class="feature-icon"><i class="fas fa-credit-card"></i></div><h3>Оплата онлайн</h3><p>Безопасная оплата курсов прямо на платформе</p></div>
+                    <div class="feature-card"><div class="feature-icon"><i class="fas fa-calendar-alt"></i></div><h3>Выбор даты</h3><p>Записывайтесь на мастер-классы в удобное время</p></div>
+                    <div class="feature-card"><div class="feature-icon"><i class="fas fa-user-check"></i></div><h3>Личный кабинет</h3><p>Отслеживайте свои записи и прогресс обучения</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="section-header"><span class="section-tag">Рекомендуем</span><h2 class="section-title">Популярные курсы</h2><p class="section-subtitle">Тысячи студентов уже выбрали эти программы</p></div>
+                <div class="courses-grid" id="featuredCourses"></div>
+            </div>
+        </section>
+
+        <section class="section cta">
+            <div class="container">
+                <div class="cta-inner"><h2>Готовы записаться на обучение?</h2><p>Выберите курс или мастер-класс и оформите заявку в личном кабинете</p><button class="btn btn-primary" onclick="navigateTo('courses')">Каталог курсов</button></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Каталог курсов -->
+    <div id="courses-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="section-header"><h2 class="section-title">Каталог курсов</h2><p class="section-subtitle">Выберите программу обучения и оформите заявку</p></div>
+                <div class="filter-section">
+                    <div class="filter-tabs" id="filterTabs"></div>
+                    <div class="search-wrapper"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Поиск курсов..."><button class="search-clear" id="searchClear">✕</button></div>
+                </div>
+                <div class="sort-filters">
+                    <div class="sort-group">
+                        <label><i class="fas fa-tag"></i> Цена</label>
+                        <select id="priceSelect" class="sort-select">
+                            <option value="all">Любая</option>
+                            <option value="0-10000">до 10 000 ₽</option>
+                            <option value="10000-30000">10 000 - 30 000 ₽</option>
+                            <option value="30000-50000">30 000 - 50 000 ₽</option>
+                            <option value="50000+">от 50 000 ₽</option>
+                        </select>
+                    </div>
+                    <div class="sort-group">
+                        <label><i class="fas fa-star"></i> Рейтинг</label>
+                        <select id="ratingSelectFilter" class="sort-select">
+                            <option value="0">Любой</option>
+                            <option value="4.5">4.5+ ★</option>
+                            <option value="4.0">4.0+ ★</option>
+                            <option value="3.5">3.5+ ★</option>
+                        </select>
+                    </div>
+                    <div class="sort-group">
+                        <label><i class="fas fa-arrow-down-wide-short"></i> Сортировка</label>
+                        <select id="sortBySelect" class="sort-select">
+                            <option value="default">По умолчанию</option>
+                            <option value="price_asc">Цена: сначала дешёвые</option>
+                            <option value="price_desc">Цена: сначала дорогие</option>
+                            <option value="rating_desc">Рейтинг: сначала высокие</option>
+                            <option value="rating_asc">Рейтинг: сначала низкие</option>
+                            <option value="popular">Популярность</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-outline btn-sm" id="resetFilters"><i class="fas fa-undo-alt"></i> Сбросить</button>
+                </div>
+                <div class="courses-grid" id="allCourses"></div>
+                <div class="pagination" id="coursesPagination"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Мастер-классы -->
+    <div id="masterclasses-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="section-header"><h2 class="section-title">Мастер-классы</h2><p class="section-subtitle">Запишитесь на интенсивное занятие с экспертом</p></div>
+                <div class="masterclasses-grid" id="masterclassesGrid"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- О нас -->
+    <div id="about-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="about-hero">
+                    <h1>О платформе SkillWay</h1>
+                    <p>Современный сервис для записи на образовательные программы</p>
+                </div>
+                <div class="stats-row" id="aboutStats"></div>
+                <div class="about-mission">
+                    <div class="mission-icon"><i class="fas fa-bullseye"></i></div>
+                    <h2>Наша миссия</h2>
+                    <p>Сделать качественное образование доступным для каждого, кто стремится развиваться и достигать новых высот в своей карьере и жизни.</p>
+                </div>
+                <div class="about-values">
+                    <h3>Наши ценности</h3>
+                    <div class="values-grid">
+                        <div class="value-card"><i class="fas fa-heart"></i><span>Доверие</span><p>Мы ценим честность и открытость</p></div>
+                        <div class="value-card"><i class="fas fa-rocket"></i><span>Развитие</span><p>Постоянно совершенствуем платформу</p></div>
+                        <div class="value-card"><i class="fas fa-users"></i><span>Сообщество</span><p>Создаём среду для обмена знаниями</p></div>
+                        <div class="value-card"><i class="fas fa-star"></i><span>Качество</span><p>Отбираем лучшие образовательные программы</p></div>
+                    </div>
+                </div>
+                <div class="about-history">
+                    <div class="history-content">
+                        <h3>Как всё начиналось</h3>
+                        <p>SkillWay был основан в 2020 году группой энтузиастов, которые верили, что образование может быть удобным, доступным и эффективным. Сегодня это полноценная экосистема для профессионального развития, объединяющая тысячи студентов и десятки экспертов.</p>
+                        <div class="history-numbers">
+                            <div><span>5+</span><br>лет на рынке</div>
+                            <div><span>120+</span><br>экспертов</div>
+                            <div><span>10k+</span><br>выпускников</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Отзывы (без статических карточек) -->
+    <div id="reviews-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="reviews-header">
+                    <div class="reviews-summary" id="reviewsSummary"></div>
+                    <button class="btn btn-primary" onclick="openReviewModal()"><i class="fas fa-pen"></i> Написать отзыв</button>
+                </div>
+                
+                <!-- Блок со статическими карточками УДАЛЁН -->
+                
+                <div class="reviews-filter">
+                    <div class="reviews-filter-buttons">
+                        <button class="review-filter-btn active" data-filter="all">Все</button>
+                        <button class="review-filter-btn" data-filter="5">5 ★</button>
+                        <button class="review-filter-btn" data-filter="4">4+ ★</button>
+                        <button class="review-filter-btn" data-filter="3">3+ ★</button>
+                    </div>
+                </div>
+                
+                <div class="reviews-grid" id="reviewsGrid"></div>
+                <div class="pagination" id="reviewsPagination"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Контакты -->
+    <div id="contacts-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Свяжитесь с нами</h2>
+                    <p class="section-subtitle">Мы всегда на связи и готовы ответить на ваши вопросы</p>
+                </div>
+                
+                <div class="contacts-grid">
+                    <div class="contacts-info">
+                        <div class="contact-card">
+                            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <h3>Офис</h3>
+                            <p>Москва, ул. Тверская, 25</p>
+                            <span class="contact-detail">м. Тверская, выход №7</span>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+                            <h3>Телефон</h3>
+                            <p>+7 (495) 123-45-67</p>
+                            <span class="contact-detail">Ежедневно с 9:00 до 20:00</span>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                            <h3>Email</h3>
+                            <p>info@skillway.ru</p>
+                            <span class="contact-detail">Ответ в течение 24 часов</span>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-icon"><i class="fab fa-telegram"></i></div>
+                            <h3>Telegram</h3>
+                            <p>@skillway_support</p>
+                            <span class="contact-detail">Быстрая поддержка</span>
+                        </div>
+                    </div>
+                    
+                    <form class="contacts-form" id="contactForm">
+                        <h3>Написать нам</h3>
+                        <div class="form-row">
+                            <input type="text" placeholder="Ваше имя" required>
+                            <input type="email" placeholder="Email" required>
+                        </div>
+                        <input type="text" placeholder="Тема сообщения">
+                        <textarea rows="5" placeholder="Сообщение" required></textarea>
+                        <button type="submit" class="btn btn-primary btn-block">Отправить сообщение</button>
+                        <p class="form-note">Нажимая на кнопку, вы соглашаетесь с политикой обработки данных</p>
+                    </form>
+                </div>
+                
+                <div class="map-section">
+                    <h3>Как нас найти</h3>
+                    <div class="map-placeholder">
+                        <div class="map-overlay">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>г. Москва, ул. Тверская, 25</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Личный кабинет -->
+    <div id="profile-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="profile-wrapper">
+                    <div class="profile-sidebar">
+                        <div class="profile-avatar" id="profileAvatar"></div>
+                        <h3 id="profileName"></h3>
+                        <p id="profileEmail"></p>
+                        <div class="profile-stats">
+                            <div><div class="stat-number" id="profileCoursesCount">0</div><span>Курсов</span></div>
+                            <div><div class="stat-number" id="profileBookingsCount">0</div><span>Записей</span></div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+                    </div>
+                    <div class="profile-main">
+                        <div class="profile-tabs">
+                            <button class="profile-tab active" data-tab="courses">Мои курсы</button>
+                            <button class="profile-tab" data-tab="bookings">Мои записи</button>
+                            <button class="profile-tab" data-tab="favorites">Избранное</button>
+                            <button class="profile-tab" id="adminPanelTabBtn" data-tab="admin" style="display:none;">Админ панель</button>
+                        </div>
+                        <div id="profileCoursesTab" class="profile-tab-content active"><div id="myCoursesList"></div></div>
+                        <div id="profileBookingsTab" class="profile-tab-content"><div id="myBookingsList"></div></div>
+                        <div id="profileFavoritesTab" class="profile-tab-content"><div id="myFavoritesList"></div></div>
+                        <div id="profileAdminTab" class="profile-tab-content">
+                            <div class="admin-stats-cards" id="profileAdminStats"></div>
+                            <div class="admin-quick-actions">
+                                <h4>Быстрое управление</h4>
+                                <div class="admin-actions-grid">
+                                    <button class="btn btn-primary btn-sm" onclick="openAddCourseModal()"><i class="fas fa-plus"></i> Добавить курс</button>
+                                    <button class="btn btn-primary btn-sm" onclick="openAddMasterclassModal()"><i class="fas fa-plus"></i> Добавить МК</button>
+                                    <button class="btn btn-outline btn-sm" onclick="openFullAdminPanel()"><i class="fas fa-cog"></i> Полная админ-панель</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Чат поддержки -->
+    <div id="support-page" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="section-header"><h2 class="section-title">Чат поддержки</h2><p class="section-subtitle">Поможем с записью на курсы</p></div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-area">
+                        <textarea id="chatMessageInput" placeholder="Напишите ваше сообщение..." rows="2"></textarea>
+                        <button class="btn btn-primary" id="sendChatMessage"><i class="fas fa-paper-plane"></i> Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Полная админ-панель -->
+    <div id="admin-page" class="page">
+        <section class="section"><div class="container">
+            <div class="section-header"><h2 class="section-title">Админ панель</h2><p class="section-subtitle">Управление платформой</p></div>
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-admin-tab="dashboard">Обзор</button>
+                <button class="admin-tab" data-admin-tab="courses">Курсы</button>
+                <button class="admin-tab" data-admin-tab="masterclasses">МК</button>
+                <button class="admin-tab" data-admin-tab="bookings">Записи</button>
+                <button class="admin-tab" data-admin-tab="users">Пользователи</button>
+                <button class="admin-tab" data-admin-tab="support">Сообщения</button>
+            </div>
+            <div id="adminDashboardTab" class="admin-tab-content active">
+                <div class="stats-cards">
+                    <div class="stat-card"><h3>Студентов</h3><p id="adminTotalStudents">0</p></div>
+                    <div class="stat-card"><h3>Выручка</h3><p id="adminTotalRevenue">0 ₽</p></div>
+                    <div class="stat-card"><h3>Курсов</h3><p id="adminTotalCourses">0</p></div>
+                    <div class="stat-card"><h3>МК</h3><p id="adminTotalMasterclasses">0</p></div>
+                </div>
+                <div><h3>Популярные курсы</h3><div id="popularCoursesList"></div></div>
+            </div>
+            <div id="adminCoursesTab" class="admin-tab-content"><div id="adminPanelCourses"></div><div class="courses-grid" id="adminCoursesList"></div></div>
+            <div id="adminMasterclassesTab" class="admin-tab-content"><div id="adminPanelMasterclasses"></div><div class="masterclasses-grid" id="adminMasterclassesList"></div></div>
+            <div id="adminBookingsTab" class="admin-tab-content"><div id="adminBookingsList"></div></div>
+            <div id="adminUsersTab" class="admin-tab-content"><div id="adminUsersList"></div></div>
+            <div id="adminSupportTab" class="admin-tab-content"><div id="adminSupportMessages"></div></div>
+        </div></section>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div><div class="footer-logo">Skill<span>Way</span></div><p class="footer-desc">Платформа для записи на образовательные курсы и мастер-классы</p><div class="footer-social"><a href="#"><i class="fab fa-telegram"></i></a><a href="#"><i class="fab fa-vk"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+            <div class="footer-links"><h4>Обучение</h4><a onclick="navigateTo('courses')">Курсы</a><a onclick="navigateTo('masterclasses')">Мастер-классы</a></div>
+            <div class="footer-links"><h4>О компании</h4><a onclick="navigateTo('about')">О нас</a><a onclick="navigateTo('reviews')">Отзывы</a><a onclick="navigateTo('contacts')">Контакты</a></div>
+            <div class="footer-contacts"><h4>Контакты</h4><p><i class="fas fa-phone"></i> +7 (495) 123-45-67</p><p><i class="fas fa-envelope"></i> info@skillway.ru</p></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2025 SkillWay. Система онлайн-записи на обучение.</p></div>
+    </div>
+</footer>
+
+<!-- Модальные окна -->
+<div id="loginModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('loginModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-sign-in-alt"></i></div><h2>Вход в аккаунт</h2><form id="loginForm"><input type="email" id="loginEmail" placeholder="Email" required><input type="password" id="loginPassword" placeholder="Пароль" required><button type="submit" class="btn btn-primary btn-block">Войти</button><div class="modal-footer"><a href="#" id="forgotPasswordLink">Забыли пароль?</a><span> | </span><a href="#" onclick="closeModal('loginModal');openModal('registerModal')">Регистрация</a></div></form></div></div></div>
+
+<div id="registerModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('registerModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-user-plus"></i></div><h2>Регистрация</h2><form id="registerForm"><input type="text" id="regName" placeholder="Имя" required><input type="email" id="regEmail" placeholder="Email" required><input type="password" id="regPassword" placeholder="Пароль (мин. 6 символов)" required><button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button></form></div></div></div>
+
+<div id="resetPasswordModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('resetPasswordModal')">&times;</button><div class="modal-body"><h2>Сброс пароля</h2><form id="resetRequestForm"><input type="email" id="resetEmail" placeholder="Ваш Email" required><div id="resetCodeSection" style="display:none"><input type="text" id="resetCode" placeholder="Код из письма"><input type="password" id="resetNewPass" placeholder="Новый пароль"><button type="button" id="submitResetBtn" class="btn btn-primary btn-block">Изменить пароль</button></div><button type="submit" class="btn btn-primary btn-block">Отправить код</button></form></div></div></div>
+
+<div id="bookingModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('bookingModal')">&times;</button><div class="modal-body"><h2>Запись на курс</h2><form id="bookingForm"><select id="bookingCourseSelect" required><option value="">Выберите курс</option></select><input type="text" id="bookingName" placeholder="Ваше имя" required><input type="email" id="bookingEmail" placeholder="Email" required><input type="tel" id="bookingPhone" placeholder="Телефон" required><button type="submit" class="btn btn-primary btn-block">Отправить заявку</button></form></div></div></div>
+
+<!-- Модальное окно оплаты с промокодом -->
+<div id="paymentModal" class="modal">
+    <div class="modal-window">
+        <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+        <div class="modal-body">
+            <h2>Оплата</h2>
+            <div id="paymentCourseInfo" style="margin-bottom: 20px; padding: 12px; background: var(--surface); border-radius: var(--radius);"></div>
+            
+            <div class="promo-section">
+                <div class="promo-header" onclick="togglePromoSection()">
+                    <span><i class="fas fa-ticket-alt"></i> Есть промокод?</span>
+                    <button type="button" class="promo-toggle" id="promoToggleBtn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="promo-body" id="promoBody">
+                    <div class="promo-input-group">
+                        <input type="text" id="promoCodeInput" placeholder="Введите промокод">
+                        <button type="button" class="btn btn-outline" id="applyPromoBtn">Применить</button>
+                    </div>
+                    <div id="promoMessage" class="promo-message" style="display: none;"></div>
+                    <div id="availablePromos" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        <small>Доступные промокоды: WELCOME10 (скидка 10% на первый курс), SKILLWAY20 (скидка 20% для новых пользователей)</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="priceBreakdown" style="margin: 16px 0; padding: 16px; background: var(--surface); border-radius: var(--radius);"></div>
+            
+            <form id="paymentForm">
+                <input type="text" placeholder="Номер карты" required>
+                <div class="form-row">
+                    <input type="text" placeholder="ММ/ГГ" required>
+                    <input type="text" placeholder="CVV" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Оплатить</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="reviewModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('reviewModal')">&times;</button><div class="modal-body"><h2>Оставить отзыв</h2><form id="reviewForm"><input type="text" id="reviewName" placeholder="Ваше имя" required><div class="rating-select" id="ratingSelect"><span data-rating="1">★</span><span data-rating="2">★</span><span data-rating="3">★</span><span data-rating="4">★</span><span data-rating="5">★</span></div><input type="hidden" id="reviewRating" value="5"><textarea id="reviewText" rows="4" placeholder="Расскажите о вашем опыте..." required></textarea><button type="submit" class="btn btn-primary btn-block">Оставить отзыв</button></form></div></div></div>
+
+<div id="detailModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('detailModal')">&times;</button><div class="modal-body" id="detailModalBody"></div></div></div>
+
+<div id="certificateModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('certificateModal')">&times;</button><div class="modal-body" id="certificateContent"></div></div></div>
+
+<div id="addEditCourseModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('addEditCourseModal')">&times;</button><div class="modal-body"><h2 id="courseModalTitle">Курс</h2><form id="courseForm"><input type="hidden" id="editCourseId"><input type="text" id="courseTitle" placeholder="Название" required><select id="courseCategory"><option>Программирование</option><option>Дизайн</option><option>Маркетинг</option><option>Бизнес</option><option>Data Science</option></select><textarea id="courseDesc" placeholder="Краткое описание" required rows="3"></textarea><input type="text" id="courseDuration" placeholder="Длительность"><input type="text" id="courseInstructor" placeholder="Преподаватель"><input type="number" id="coursePrice" placeholder="Цена" required><input type="number" id="courseOldPrice" placeholder="Старая цена"><textarea id="courseLongDesc" placeholder="Полное описание" rows="4"></textarea><input type="text" id="courseImage" placeholder="URL картинки (опционально)"><button type="submit" class="btn btn-primary btn-block">Сохранить</button></form></div></div></div>
+
+<div id="addEditMasterclassModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('addEditMasterclassModal')">&times;</button><div class="modal-body"><h2 id="mcModalTitle">Мастер-класс</h2><form id="masterclassForm"><input type="hidden" id="editMcId"><input type="text" id="mcTitle" placeholder="Название" required><textarea id="mcDesc" placeholder="Описание" required rows="3"></textarea><input type="text" id="mcDuration" placeholder="Длительность"><input type="text" id="mcInstructor" placeholder="Ведущий"><input type="datetime-local" id="mcDatetime"><input type="number" id="mcPrice" placeholder="Цена" required><textarea id="mcLongDesc" placeholder="Полное описание" rows="4"></textarea><input type="text" id="mcImage" placeholder="URL картинки (опционально)"><button type="submit" class="btn btn-primary btn-block">Сохранить</button></form></div></div></div>
+
+<div id="promoModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('promoModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-gift"></i></div><h2>Активация промокода</h2><p style="text-align: center; margin-bottom: 20px;">Введите полученный промокод для активации скидки</p><input type="text" id="activatePromoInput" placeholder="Промокод"><button class="btn btn-primary btn-block" onclick="activatePromoCode()">Активировать</button></div></div></div>
+
+<div id="notification" class="notification"><div class="notification-inner"><i class="fas fa-check-circle"></i><span id="notificationText"></span></div></div>
+
+<script src="script.js"></script>
+</body>
+</html>
