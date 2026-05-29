@@ -149,18 +149,18 @@ function saveSupportMessages(data) { localStorage.setItem('supportMessages', JSO
 
 // ========== КАРТИНКИ ==========
 const courseImages = {
-    1: "images/course-web.jpg",
-    2: "images/course-design.jpg",
-    3: "images/course-marketing.jpg",
-    4: "images/course-python.jpg",
-    5: "images/course-smm.jpg",
-    6: "images/course-business.jpg"
+    1: "course-web.jpg",
+    2: "course-design.jpg",
+    3: "course-marketing.jpg",
+    4: "course-python.jpg",
+    5: "course-smm.jpg",
+    6: "course-business.jpg"
 };
 
 const masterImages = {
-    1: "images/master-site.jpg",
-    2: "images/master-figma.jpg",
-    3: "images/master-agile.jpg"
+    1: "master-site.jpg",
+    2: "master-figma.jpg",
+    3: "master-agile.jpg"
 };
 
 function getCourseImage(course) {
