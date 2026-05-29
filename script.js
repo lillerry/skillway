@@ -1,6 +1,6 @@
 // SkillWay - РАБОЧАЯ ВЕРСИЯ
 const SUPABASE_URL = 'https://nrwlxqhkzbvggftyestg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yd2x4cWhremJ2Z2dmdHllc3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MjU2MTEsImV4cCI6MjA2NDAwMTYxMX0.6oQ_S_YqLcRa-ykgkWIfRvlRuDywN5no9NnP9Hls1xU'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yd2x4cWhremJ2Z2dmdHllc3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTcwMDcsImV4cCI6MjA5NTUzMzAwN30._rbBlzZSxyxlIHExKyFVH-k5aPslAdCYINRlW_TOk74'
 
 let supabaseClient = null
 
