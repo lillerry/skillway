@@ -1,84 +1,13 @@
 // ==========================================
 // SkillWay - Образовательная платформа
-// ОРИГИНАЛЬНАЯ ВЕРСИЯ + ПОДКЛЮЧЕНИЕ К SUPABASE
+// С ПОДКЛЮЧЕНИЕМ К SUPABASE
 // ==========================================
 
 // ========== ПОДКЛЮЧЕНИЕ К SUPABASE ==========
 const SUPABASE_URL = 'https://nrwlxqhkzbvggftyestg.supabase.co'
-const SUPABASE_ANON_KEY = 'ВАШ_НОВЫЙ_ANON_КЛЮЧ_ИЗ_НАСТРОЕК_SUPABASE'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yd2x4cWhremJ2Z2dmdHllc3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MjU2MTEsImV4cCI6MjA2NDAwMTYxMX0.6oQ_S_YqLcRa-ykgkWIfRvlRuDywN5no9NnP9Hls1xU'
 
-let supabaseClient = null
-
-// СОЗДАЁМ КЛИЕНТ ПРИ ЗАГРУЗКЕ
-document.addEventListener('DOMContentLoaded', async function() {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    
-    // ЗАГРУЖАЕМ КУРСЫ ИЗ БАЗЫ
-    await loadCoursesFromSupabase()
-    await loadMasterclassesFromSupabase()
-    await loadReviewsFromSupabase()
-})
-
-async function loadCoursesFromSupabase() {
-    const { data, error } = await supabaseClient
-        .from('courses')
-        .select('*')
-    
-    if (error) {
-        console.error('Ошибка загрузки курсов:', error)
-        return
-    }
-    
-    if (data && data.length > 0) {
-        // СОХРАНЯЕМ В localStorage ДЛЯ СОВМЕСТИМОСТИ
-        localStorage.setItem('courses', JSON.stringify(data))
-        console.log('Курсы загружены из Supabase:', data.length)
-    }
-}
-
-async function loadMasterclassesFromSupabase() {
-    const { data, error } = await supabaseClient
-        .from('masterclasses')
-        .select('*')
-    
-    if (error) {
-        console.error('Ошибка загрузки МК:', error)
-        return
-    }
-    
-    if (data && data.length > 0) {
-        localStorage.setItem('masterclasses', JSON.stringify(data))
-        console.log('МК загружены из Supabase:', data.length)
-    }
-}
-
-async function loadReviewsFromSupabase() {
-    const { data, error } = await supabaseClient
-        .from('reviews')
-        .select('*')
-    
-    if (error) {
-        console.error('Ошибка загрузки отзывов:', error)
-        return
-    }
-    
-    if (data && data.length > 0) {
-        localStorage.setItem('reviews', JSON.stringify(data))
-        console.log('Отзывы загружены из Supabase:', data.length)
-    }
-}
-
-// ========== ВАШ ОРИГИНАЛЬНЫЙ КОД (ВСЕ ФУНКЦИИ) ==========
-// ВАШ ВЕСЬ ОРИГИНАЛЬНЫЙ КОД ИЗ script.js ИДЁТ ЗДЕСЬ
-// (все функции: initStorage, register, login, renderAllCourses, 
-//  openDetailModal, toggleFavorite, админ-панель и т.д.)
-
-// Я не меняю НИ ОДНУ ВАШУ ФУНКЦИЮ
-// ТОЛЬКО ДОБАВЛЯЮ ЗАГРУЗКУ ДАННЫХ ИЗ SUPABASE
-
-// ВАШ ОРИГИНАЛЬНЫЙ КОД НАЧИНАЕТСЯ ЗДЕСЬ
-// (скопируйте ваш старый script.js сюда)
-
+let supabaseClient = null;
 let currentUser = null;
 let currentCoursesPage = 1;
 let currentReviewsPage = 1;
@@ -90,34 +19,124 @@ let appliedPromo = null;
 const COURSES_PER_PAGE = 6;
 const REVIEWS_PER_PAGE = 5;
 
-// ========== НАЧАЛЬНЫЕ ДАННЫЕ ==========
-const defaultCourses = [
-    { id: 1, title: "Веб-разработка с нуля", category: "Программирование", description: "Освойте HTML, CSS, JavaScript и React. Полноценный курс для старта карьеры.", duration: "3 месяца", instructor: "Алексей", students: 2847, rating: 4.9, price: 29900, oldPrice: 49900, featured: true, longDescription: "Полный курс по веб-разработке: от основ до создания сложных React-приложений.", lessons: ["Введение", "HTML основы", "CSS стили", "JavaScript", "React", "Финальный проект"] },
-    { id: 2, title: "UI/UX дизайн", category: "Дизайн", description: "Изучите Figma, прототипирование и дизайн-системы.", duration: "2 месяца", instructor: "Мария", students: 2156, rating: 4.8, price: 24900, oldPrice: 39900, featured: true, longDescription: "Курс по UI/UX дизайну: композиция, типографика, создание прототипов.", lessons: ["Figma", "Композиция", "Прототипирование", "Дизайн-системы"] },
-    { id: 3, title: "Digital-маркетинг", category: "Маркетинг", description: "SEO, SMM, контекстная реклама.", duration: "2.5 месяца", instructor: "Дмитрий", students: 3521, rating: 4.7, price: 27900, oldPrice: 44900, featured: true, longDescription: "Освойте все каналы digital-маркетинга.", lessons: ["SEO", "Контекстная реклама", "SMM", "Аналитика"] },
-    { id: 4, title: "Python для анализа данных", category: "Data Science", description: "Pandas, NumPy, Matplotlib.", duration: "4 месяца", instructor: "Сергей", students: 1892, rating: 4.9, price: 34900, oldPrice: 54900, featured: false, longDescription: "Python для Data Science: работа с данными, визуализация, статистика.", lessons: ["Python основы", "NumPy", "Pandas", "Визуализация"] },
-    { id: 5, title: "SMM и продвижение", category: "Маркетинг", description: "Стратегии продвижения в соцсетях.", duration: "1.5 месяца", instructor: "Анна", students: 2634, rating: 4.6, price: 19900, oldPrice: 29900, featured: false, longDescription: "Курс по SMM: контент-план, таргет, аналитика.", lessons: ["Контент-план", "Таргет", "Работа с блогерами", "Аналитика"] },
-    { id: 6, title: "Бизнес-аналитика", category: "Бизнес", description: "Excel, Power BI, SQL.", duration: "3 месяца", instructor: "Павел", students: 1245, rating: 4.8, price: 31900, oldPrice: 49900, featured: false, longDescription: "Навыки бизнес-аналитика: Excel, SQL, Power BI.", lessons: ["Excel", "SQL", "Power BI", "Кейсы"] }
-];
+// ========== КАРТИНКИ (ПРЯМЫЕ ССЫЛКИ) ==========
+const courseImages = {
+    1: "https://raw.githubusercontent.com/lillerry/skillway/main/course-web.jpg",
+    2: "https://raw.githubusercontent.com/lillerry/skillway/main/course-design.jpg",
+    3: "https://raw.githubusercontent.com/lillerry/skillway/main/course-marketing.jpg",
+    4: "https://raw.githubusercontent.com/lillerry/skillway/main/course-python.jpg",
+    5: "https://raw.githubusercontent.com/lillerry/skillway/main/course-smm.jpg",
+    6: "https://raw.githubusercontent.com/lillerry/skillway/main/course-business.jpg"
+};
 
-const defaultMasterclasses = [
-    { id: 1, title: "Создание сайта за 3 часа", description: "Практический мастер-класс по созданию сайта-портфолио.", duration: "3 часа", instructor: "Игорь", datetime: "2025-06-20T19:00", price: 2900, longDescription: "Создадите сайт-портфолио за 3 часа." },
-    { id: 2, title: "Графический дизайн в Figma", description: "Основы композиции, цвета, типографики.", duration: "2 часа", instructor: "Елена", datetime: "2025-06-25T18:30", price: 1900, longDescription: "Создание логотипов и брендбуков." },
-    { id: 3, title: "Управление проектами Agile", description: "Методологии Agile, Scrum, Kanban.", duration: "2.5 часа", instructor: "Дмитрий", datetime: "2025-06-28T20:00", price: 2400, longDescription: "Agile, Scrum, Kanban." }
-];
+const masterImages = {
+    1: "https://raw.githubusercontent.com/lillerry/skillway/main/master-site.jpg",
+    2: "https://raw.githubusercontent.com/lillerry/skillway/main/master-figma.jpg",
+    3: "https://raw.githubusercontent.com/lillerry/skillway/main/master-agile.jpg"
+};
 
-const defaultReviews = [
-    { id: 1, userName: "Анна", rating: 5, text: "После курса 'Веб-разработка' нашла работу мечты за 2 месяца!", date: "2025-03-15" },
-    { id: 2, userName: "Иван", rating: 5, text: "Отличная платформа. Всё структурировано, много практики.", date: "2025-03-10" },
-    { id: 3, userName: "Мария", rating: 5, text: "Лучшие курсы, которые я проходила!", date: "2025-03-05" }
-];
+// ========== ЗАГРУЗКА ИЗ SUPABASE ==========
+async function loadFromSupabase() {
+    try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Загружаем курсы
+        const { data: courses, error: coursesError } = await supabaseClient
+            .from('courses')
+            .select('*');
+        
+        if (!coursesError && courses && courses.length > 0) {
+            const formattedCourses = courses.map(c => ({
+                id: c.id,
+                title: c.title,
+                category: c.category,
+                description: c.description,
+                duration: c.duration,
+                instructor: c.instructor,
+                students: c.students,
+                rating: c.rating,
+                price: c.price,
+                oldPrice: c.old_price,
+                featured: c.featured,
+                longDescription: c.long_description,
+                lessons: c.lessons || ["Урок 1", "Урок 2", "Урок 3"]
+            }));
+            localStorage.setItem('courses', JSON.stringify(formattedCourses));
+            console.log('✅ Курсы загружены из Supabase:', formattedCourses.length);
+        }
+        
+        // Загружаем мастер-классы
+        const { data: masterclasses, error: mcError } = await supabaseClient
+            .from('masterclasses')
+            .select('*');
+        
+        if (!mcError && masterclasses && masterclasses.length > 0) {
+            const formattedMCs = masterclasses.map(m => ({
+                id: m.id,
+                title: m.title,
+                description: m.description,
+                duration: m.duration,
+                instructor: m.instructor,
+                datetime: m.datetime,
+                price: m.price,
+                longDescription: m.long_description
+            }));
+            localStorage.setItem('masterclasses', JSON.stringify(formattedMCs));
+            console.log('✅ МК загружены из Supabase:', formattedMCs.length);
+        }
+        
+        // Загружаем отзывы
+        const { data: reviews, error: reviewsError } = await supabaseClient
+            .from('reviews')
+            .select('*');
+        
+        if (!reviewsError && reviews && reviews.length > 0) {
+            const formattedReviews = reviews.map(r => ({
+                id: r.id,
+                userName: r.user_name,
+                rating: r.rating,
+                text: r.text,
+                date: r.date
+            }));
+            localStorage.setItem('reviews', JSON.stringify(formattedReviews));
+            console.log('✅ Отзывы загружены из Supabase:', formattedReviews.length);
+        }
+        
+    } catch (error) {
+        console.error('❌ Ошибка загрузки из Supabase:', error);
+    }
+}
 
 // ========== ИНИЦИАЛИЗАЦИЯ ХРАНИЛИЩА ==========
 function initStorage() {
-    // ПРОВЕРЯЕМ, ЕСТЬ ЛИ ДАННЫЕ В localStorage
-    if (!localStorage.getItem('courses')) localStorage.setItem('courses', JSON.stringify(defaultCourses));
-    if (!localStorage.getItem('masterclasses')) localStorage.setItem('masterclasses', JSON.stringify(defaultMasterclasses));
-    if (!localStorage.getItem('reviews')) localStorage.setItem('reviews', JSON.stringify(defaultReviews));
+    if (!localStorage.getItem('courses')) {
+        // Дефолтные курсы если нет в localStorage
+        const defaultCourses = [
+            { id: 1, title: "Веб-разработка с нуля", category: "Программирование", description: "Освойте HTML, CSS, JavaScript и React.", duration: "3 месяца", instructor: "Алексей", students: 2847, rating: 4.9, price: 29900, oldPrice: 49900, featured: true, longDescription: "Полный курс по веб-разработке.", lessons: ["Введение", "HTML основы", "CSS стили", "JavaScript", "React", "Финальный проект"] },
+            { id: 2, title: "UI/UX дизайн", category: "Дизайн", description: "Изучите Figma, прототипирование.", duration: "2 месяца", instructor: "Мария", students: 2156, rating: 4.8, price: 24900, oldPrice: 39900, featured: true, longDescription: "Курс по UI/UX дизайну.", lessons: ["Figma", "Композиция", "Прототипирование", "Дизайн-системы"] },
+            { id: 3, title: "Digital-маркетинг", category: "Маркетинг", description: "SEO, SMM, контекстная реклама.", duration: "2.5 месяца", instructor: "Дмитрий", students: 3521, rating: 4.7, price: 27900, oldPrice: 44900, featured: true, longDescription: "Освойте все каналы digital-маркетинга.", lessons: ["SEO", "Контекстная реклама", "SMM", "Аналитика"] },
+            { id: 4, title: "Python для анализа данных", category: "Data Science", description: "Pandas, NumPy, Matplotlib.", duration: "4 месяца", instructor: "Сергей", students: 1892, rating: 4.9, price: 34900, oldPrice: 54900, featured: false, longDescription: "Python для Data Science.", lessons: ["Python основы", "NumPy", "Pandas", "Визуализация"] },
+            { id: 5, title: "SMM и продвижение", category: "Маркетинг", description: "Стратегии продвижения в соцсетях.", duration: "1.5 месяца", instructor: "Анна", students: 2634, rating: 4.6, price: 19900, oldPrice: 29900, featured: false, longDescription: "Курс по SMM.", lessons: ["Контент-план", "Таргет", "Работа с блогерами", "Аналитика"] },
+            { id: 6, title: "Бизнес-аналитика", category: "Бизнес", description: "Excel, Power BI, SQL.", duration: "3 месяца", instructor: "Павел", students: 1245, rating: 4.8, price: 31900, oldPrice: 49900, featured: false, longDescription: "Навыки бизнес-аналитика.", lessons: ["Excel", "SQL", "Power BI", "Кейсы"] }
+        ];
+        localStorage.setItem('courses', JSON.stringify(defaultCourses));
+    }
+    if (!localStorage.getItem('masterclasses')) {
+        const defaultMasterclasses = [
+            { id: 1, title: "Создание сайта за 3 часа", description: "Практический мастер-класс.", duration: "3 часа", instructor: "Игорь", datetime: "2025-06-20T19:00", price: 2900, longDescription: "Создадите сайт-портфолио за 3 часа." },
+            { id: 2, title: "Графический дизайн в Figma", description: "Основы композиции, цвета.", duration: "2 часа", instructor: "Елена", datetime: "2025-06-25T18:30", price: 1900, longDescription: "Создание логотипов и брендбуков." },
+            { id: 3, title: "Управление проектами Agile", description: "Методологии Agile, Scrum.", duration: "2.5 часа", instructor: "Дмитрий", datetime: "2025-06-28T20:00", price: 2400, longDescription: "Agile, Scrum, Kanban." }
+        ];
+        localStorage.setItem('masterclasses', JSON.stringify(defaultMasterclasses));
+    }
+    if (!localStorage.getItem('reviews')) {
+        const defaultReviews = [
+            { id: 1, userName: "Анна", rating: 5, text: "После курса нашла работу мечты!", date: "2025-03-15" },
+            { id: 2, userName: "Иван", rating: 5, text: "Отличная платформа. Всё структурировано.", date: "2025-03-10" },
+            { id: 3, userName: "Мария", rating: 5, text: "Лучшие курсы, которые я проходила!", date: "2025-03-05" }
+        ];
+        localStorage.setItem('reviews', JSON.stringify(defaultReviews));
+    }
     
     const admin = { id: 1, name: "Администратор", email: "admin@skillway.ru", password: "admin123", role: "admin", enrolledCourses: [], favorites: [], lessonProgress: {} };
     const demoUser = { id: 2, name: "Демо Пользователь", email: "demo@skillway.ru", password: "demo123", role: "user", enrolledCourses: [1], favorites: [2], lessonProgress: {1: 2} };
@@ -146,22 +165,6 @@ function saveUsers(data) { localStorage.setItem('users', JSON.stringify(data)); 
 function saveBookings(data) { localStorage.setItem('bookings', JSON.stringify(data)); }
 function savePayments(data) { localStorage.setItem('payments', JSON.stringify(data)); }
 function saveSupportMessages(data) { localStorage.setItem('supportMessages', JSON.stringify(data)); }
-
-// ========== КАРТИНКИ ==========
-const courseImages = {
-    1: "https://raw.githubusercontent.com/lillerry/skillway/main/course-web.jpg",
-    2: "https://raw.githubusercontent.com/lillerry/skillway/main/course-design.jpg",
-    3: "https://raw.githubusercontent.com/lillerry/skillway/main/course-marketing.jpg",
-    4: "https://raw.githubusercontent.com/lillerry/skillway/main/course-python.jpg",
-    5: "https://raw.githubusercontent.com/lillerry/skillway/main/course-smm.jpg",
-    6: "https://raw.githubusercontent.com/lillerry/skillway/main/course-business.jpg"
-};
-
-const masterImages = {
-    1: "https://raw.githubusercontent.com/lillerry/skillway/main/master-site.jpg",
-    2: "https://raw.githubusercontent.com/lillerry/skillway/main/master-figma.jpg",
-    3: "https://raw.githubusercontent.com/lillerry/skillway/main/master-agile.jpg"
-};
 
 function getCourseImage(course) {
     if (course.customImage && course.customImage !== "") return course.customImage;
@@ -293,7 +296,7 @@ function createCourseCard(course, isAdmin = false) {
     const adminButtons = isAdmin ? `<div class="admin-edit-btn" onclick="event.stopPropagation(); openEditCourseModal(${JSON.stringify(course).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i> Ред.</div><div class="admin-edit-btn" style="top:48px; background:#dc2626;" onclick="event.stopPropagation(); deleteCourse(${course.id})"><i class="fas fa-trash"></i> Уд.</div>` : '';
     const icon = { 'Программирование': 'code', 'Дизайн': 'pencil-ruler', 'Маркетинг': 'chart-line', 'Бизнес': 'briefcase', 'Data Science': 'chart-bar' }[course.category] || 'graduation-cap';
     const imgUrl = getCourseImage(course);
-    let imageHtml = imgUrl ? `<img src="${imgUrl}" alt="${escapeHtml(course.title)}" onerror="this.parentElement.innerHTML='<div class=\'image-fallback\'><i class=\'fas fa-${icon}\'></i></div>'">` : `<div class="image-fallback"><i class="fas fa-${icon}"></i></div>`;
+    let imageHtml = imgUrl ? `<img src="${imgUrl}" alt="${escapeHtml(course.title)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\'image-fallback\'><i class=\'fas fa-${icon}\'></i></div>'">` : `<div class="image-fallback"><i class="fas fa-${icon}"></i></div>`;
     
     return `<div class="course-card" data-type="course" data-id="${course.id}"><div class="course-image">${imageHtml}${discount > 0 ? `<span class="course-badge hot">-${discount}%</span>` : ''}</div>${adminButtons}<div class="course-content"><span class="course-category">${course.category}</span><h3 class="course-title">${escapeHtml(course.title)}</h3><p class="course-description">${escapeHtml(course.description)}</p><div class="course-meta"><span><i class="far fa-clock"></i> ${course.duration}</span><span><i class="fas fa-users"></i> ${course.students}</span></div><div class="course-footer"><div><span class="course-price">${course.price.toLocaleString()} ₽</span>${course.oldPrice ? `<span class="course-price-old">${course.oldPrice.toLocaleString()} ₽</span>` : ''}</div><div class="stars">${getStars(course.rating)}</div></div><div style="margin-top:16px;display:flex;gap:10px;" onclick="event.stopPropagation()">${isEnrolled ? `<button class="btn btn-primary btn-block" onclick="continueCourse(${course.id})">Продолжить</button>` : `<button class="btn btn-primary btn-block" onclick="openBookingModal(${course.id})">Записаться</button>`}<button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${course.id})"><i class="fas fa-heart"></i></button></div></div></div>`;
 }
@@ -301,15 +304,50 @@ function createCourseCard(course, isAdmin = false) {
 function createMasterclassCard(mc, isAdmin = false) {
     const adminButtons = isAdmin ? `<div class="admin-edit-btn" onclick="event.stopPropagation(); openEditMasterclassModal(${JSON.stringify(mc).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i> Ред.</div><div class="admin-edit-btn" style="top:48px; background:#dc2626;" onclick="event.stopPropagation(); deleteMasterclass(${mc.id})"><i class="fas fa-trash"></i> Уд.</div>` : '';
     const imgUrl = getMasterclassImage(mc);
-    let imageHtml = imgUrl ? `<img src="${imgUrl}" alt="${escapeHtml(mc.title)}" onerror="this.parentElement.innerHTML='<div class=\'image-fallback\'><i class=\'fas fa-chalkboard-user\'></i></div>'">` : `<div class="image-fallback"><i class="fas fa-chalkboard-user"></i></div>`;
+    let imageHtml = imgUrl ? `<img src="${imgUrl}" alt="${escapeHtml(mc.title)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\'image-fallback\'><i class=\'fas fa-chalkboard-user\'></i></div>'">` : `<div class="image-fallback"><i class="fas fa-chalkboard-user"></i></div>`;
     return `<div class="course-card" data-type="masterclass" data-id="${mc.id}"><div class="course-image">${imageHtml}<span class="course-badge hot">Мастер-класс</span></div>${adminButtons}<div class="course-content"><span class="course-category">Интенсив</span><h3 class="course-title">${escapeHtml(mc.title)}</h3><p class="course-description">${escapeHtml(mc.description)}</p><div class="course-meta"><span><i class="far fa-calendar"></i> ${formatDatetime(mc.datetime)}</span><span><i class="fas fa-hourglass-half"></i> ${mc.duration}</span></div><div class="course-footer"><span class="course-price">${mc.price.toLocaleString()} ₽</span><button class="btn btn-primary" onclick="event.stopPropagation(); bookMasterclass(${mc.id})">Записаться</button></div></div></div>`;
 }
 
 // ========== ОТРИСОВКА ==========
-function renderFeaturedCourses() { const c = document.getElementById('featuredCourses'); if(c) { const featured = getCourses().filter(c => c.featured); c.innerHTML = featured.map(c => createCourseCard(c, false)).join(''); } }
-function renderAllCourses() { const c = document.getElementById('allCourses'); if(!c) return; let courses = getCourses(); filteredCourses = applyFiltersAndSort(courses); const start = (currentCoursesPage - 1) * COURSES_PER_PAGE; const paginated = filteredCourses.slice(start, start + COURSES_PER_PAGE); const isAdmin = currentUser && currentUser.email === 'admin@skillway.ru'; c.innerHTML = paginated.length ? paginated.map(crs => createCourseCard(crs, isAdmin)).join('') : '<div class="empty-state">Ничего не найдено</div>'; renderCoursesPagination(); }
-function renderCoursesPagination() { const totalPages = Math.ceil(filteredCourses.length / COURSES_PER_PAGE); const c = document.getElementById('coursesPagination'); if(!c) return; if(totalPages <= 1) { c.innerHTML = ''; return; } let html = ''; for(let i = 1; i <= totalPages; i++) html += `<button class="${i === currentCoursesPage ? 'active' : ''}" onclick="currentCoursesPage = ${i}; renderAllCourses();">${i}</button>`; c.innerHTML = html; }
-function renderMasterclasses() { const c = document.getElementById('masterclassesGrid'); if(c) { const mcs = [...getMasterclasses()].sort((a, b) => new Date(a.datetime) - new Date(b.datetime)); const isAdmin = currentUser && currentUser.email === 'admin@skillway.ru'; c.innerHTML = mcs.map(mc => createMasterclassCard(mc, isAdmin)).join(''); } }
+function renderFeaturedCourses() { 
+    const container = document.getElementById('featuredCourses'); 
+    if(container) { 
+        const featured = getCourses().filter(c => c.featured === true); 
+        const isAdmin = currentUser && currentUser.email === 'admin@skillway.ru';
+        container.innerHTML = featured.map(course => createCourseCard(course, isAdmin)).join(''); 
+    } 
+}
+
+function renderAllCourses() { 
+    const container = document.getElementById('allCourses'); 
+    if(!container) return; 
+    let courses = getCourses(); 
+    filteredCourses = applyFiltersAndSort(courses); 
+    const start = (currentCoursesPage - 1) * COURSES_PER_PAGE; 
+    const paginated = filteredCourses.slice(start, start + COURSES_PER_PAGE); 
+    const isAdmin = currentUser && currentUser.email === 'admin@skillway.ru'; 
+    container.innerHTML = paginated.length ? paginated.map(crs => createCourseCard(crs, isAdmin)).join('') : '<div class="empty-state">Ничего не найдено</div>'; 
+    renderCoursesPagination(); 
+}
+
+function renderCoursesPagination() { 
+    const totalPages = Math.ceil(filteredCourses.length / COURSES_PER_PAGE); 
+    const container = document.getElementById('coursesPagination'); 
+    if(!container) return; 
+    if(totalPages <= 1) { container.innerHTML = ''; return; } 
+    let html = ''; 
+    for(let i = 1; i <= totalPages; i++) html += `<button class="${i === currentCoursesPage ? 'active' : ''}" onclick="currentCoursesPage = ${i}; renderAllCourses();">${i}</button>`; 
+    container.innerHTML = html; 
+}
+
+function renderMasterclasses() { 
+    const container = document.getElementById('masterclassesGrid'); 
+    if(container) { 
+        const mcs = [...getMasterclasses()].sort((a, b) => new Date(a.datetime) - new Date(b.datetime)); 
+        const isAdmin = currentUser && currentUser.email === 'admin@skillway.ru'; 
+        container.innerHTML = mcs.map(mc => createMasterclassCard(mc, isAdmin)).join(''); 
+    } 
+}
 
 function renderReviews() {
     const container = document.getElementById('reviewsGrid');
@@ -321,10 +359,40 @@ function renderReviews() {
     container.innerHTML = paginated.length ? paginated.map(r => `<div class="review-card"><div class="review-header"><div><span class="review-name">${escapeHtml(r.userName)}</span><div class="review-date">${r.date}</div></div><div class="review-rating">${getStars(r.rating)}</div></div><p class="review-text">${escapeHtml(r.text)}</p></div>`).join('') : '<div class="empty-state">Пока нет отзывов с таким рейтингом</div>';
     renderReviewsPagination(rev.length);
 }
-function renderReviewsPagination(total) { const totalPages = Math.ceil(total / REVIEWS_PER_PAGE); const c = document.getElementById('reviewsPagination'); if(!c) return; if(totalPages <= 1) { c.innerHTML = ''; return; } let html = ''; for(let i = 1; i <= totalPages; i++) html += `<button class="${i === currentReviewsPage ? 'active' : ''}" onclick="currentReviewsPage = ${i}; renderReviews();">${i}</button>`; c.innerHTML = html; }
-function renderReviewsSummary() { const c = document.getElementById('reviewsSummary'); if(!c) return; const rev = getReviews(); const avg = rev.length ? (rev.reduce((s, r) => s + r.rating, 0) / rev.length).toFixed(1) : 0; c.innerHTML = `<div><span class="rating-number">${avg}</span><div class="stars">${getStars(avg)}</div></div><div>${rev.length} отзывов</div>`; }
-function renderHeroStats() { const c = document.getElementById('heroStats'); if(!c) return; const coursesCount = getCourses().length; const usersCount = getUsers().length + 5000; c.innerHTML = `<div class="hero-stat"><span class="hero-stat-number" data-target="${coursesCount}">0</span><span class="hero-stat-label">курсов</span></div><div class="hero-stat"><span class="hero-stat-number" data-target="${usersCount}">0</span><span class="hero-stat-label">студентов</span></div><div class="hero-stat"><span class="hero-stat-number" data-target="98">0</span><span class="hero-stat-label">% довольны</span></div>`; animateNumbers(document.querySelectorAll('.hero-stat-number')); }
-function renderAboutStats() { const c = document.getElementById('aboutStats'); if(!c) return; c.innerHTML = `<div class="stat-big"><span class="stat-number" data-target="5">0</span><span>+ лет</span><p>на рынке</p></div><div class="stat-big"><span class="stat-number" data-target="120">0</span><span>+</span><p>экспертов</p></div><div class="stat-big"><span class="stat-number" data-target="5000">0</span><span>+</span><p>выпускников</p></div><div class="stat-big"><span class="stat-number" data-target="95">0</span><span>%</span><p>трудоустройство</p></div>`; animateNumbers(document.querySelectorAll('.stat-number')); }
+
+function renderReviewsPagination(total) { 
+    const totalPages = Math.ceil(total / REVIEWS_PER_PAGE); 
+    const container = document.getElementById('reviewsPagination'); 
+    if(!container) return; 
+    if(totalPages <= 1) { container.innerHTML = ''; return; } 
+    let html = ''; 
+    for(let i = 1; i <= totalPages; i++) html += `<button class="${i === currentReviewsPage ? 'active' : ''}" onclick="currentReviewsPage = ${i}; renderReviews();">${i}</button>`; 
+    container.innerHTML = html; 
+}
+
+function renderReviewsSummary() { 
+    const container = document.getElementById('reviewsSummary'); 
+    if(!container) return; 
+    const rev = getReviews(); 
+    const avg = rev.length ? (rev.reduce((s, r) => s + r.rating, 0) / rev.length).toFixed(1) : 0; 
+    container.innerHTML = `<div><span class="rating-number">${avg}</span><div class="stars">${getStars(avg)}</div></div><div>${rev.length} отзывов</div>`; 
+}
+
+function renderHeroStats() { 
+    const container = document.getElementById('heroStats'); 
+    if(!container) return; 
+    const coursesCount = getCourses().length; 
+    const usersCount = getUsers().length + 5000; 
+    container.innerHTML = `<div class="hero-stat"><span class="hero-stat-number" data-target="${coursesCount}">0</span><span class="hero-stat-label">курсов</span></div><div class="hero-stat"><span class="hero-stat-number" data-target="${usersCount}">0</span><span class="hero-stat-label">студентов</span></div><div class="hero-stat"><span class="hero-stat-number" data-target="98">0</span><span class="hero-stat-label">% довольны</span></div>`; 
+    animateNumbers(document.querySelectorAll('.hero-stat-number')); 
+}
+
+function renderAboutStats() { 
+    const container = document.getElementById('aboutStats'); 
+    if(!container) return; 
+    container.innerHTML = `<div class="stat-big"><span class="stat-number" data-target="5">0</span><span>+ лет</span><p>на рынке</p></div><div class="stat-big"><span class="stat-number" data-target="120">0</span><span>+</span><p>экспертов</p></div><div class="stat-big"><span class="stat-number" data-target="5000">0</span><span>+</span><p>выпускников</p></div><div class="stat-big"><span class="stat-number" data-target="95">0</span><span>%</span><p>трудоустройство</p></div>`; 
+    animateNumbers(document.querySelectorAll('.stat-number')); 
+}
 
 function applyFiltersAndSort(courses) {
     const activeCat = document.querySelector('.filter-tab.active')?.dataset.category || 'all';
@@ -369,9 +437,38 @@ function renderProfile() {
     if(adminTabBtn) adminTabBtn.style.display = isAdmin ? 'block' : 'none';
 }
 
-function renderProfileCourses() { const c = document.getElementById('myCoursesList'); if(!c) return; const enrolled = getCourses().filter(crs => currentUser.enrolledCourses?.includes(crs.id)); if(!enrolled.length) { c.innerHTML = '<div class="empty-state">У вас пока нет записанных курсов</div>'; return; } c.innerHTML = enrolled.map(crs => { const progress = currentUser.lessonProgress?.[crs.id] || 0; const total = crs.lessons?.length || 1; const percent = (progress / total) * 100; return `<div class="profile-list-item"><div><h4>${crs.title}</h4><p>${crs.instructor} • ${crs.duration}</p><div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div><span>Прогресс: ${progress}/${total} уроков</span></div><div><span class="course-price">${crs.price.toLocaleString()} ₽</span><button class="btn btn-primary btn-sm" onclick="continueCourse(${crs.id})">Продолжить</button>${progress === total ? `<button class="btn btn-outline btn-sm" onclick="generateCertificate('${crs.title}')">Сертификат</button>` : ''}</div></div>`; }).join(''); }
-function renderProfileBookings() { const c = document.getElementById('myBookingsList'); if(!c) return; const bookings = getBookings().filter(b => b.userId === currentUser.id); if(!bookings.length) { c.innerHTML = '<div class="empty-state">У вас пока нет записей</div>'; return; } c.innerHTML = bookings.map(b => { const payment = getPayments().find(p => p.bookingId === b.id); const status = payment?.status === 'paid' ? 'Оплачено' : 'Ожидает оплаты'; return `<div class="profile-list-item"><div><h4>${b.type === 'course' ? 'Курс' : 'МК'}: ${b.title}</h4><p>Дата: ${b.date || 'уточняется'} • ${status}</p></div><div><span class="course-price">${b.price?.toLocaleString() || '—'} ₽</span>${payment?.status !== 'paid' ? `<button class="btn btn-primary btn-sm" onclick="initiatePayment(${b.id}, '${b.type}', ${b.itemId}, '${b.title}', ${b.price})">Оплатить</button>` : ''}</div></div>`; }).join(''); }
-function renderProfileFavorites() { const c = document.getElementById('myFavoritesList'); if(!c) return; const favs = getCourses().filter(c => currentUser.favorites?.includes(c.id)); if(!favs.length) { c.innerHTML = '<div class="empty-state">Нет избранных курсов</div>'; return; } c.innerHTML = favs.map(c => `<div class="profile-list-item"><div><h4>${c.title}</h4><p>${c.price.toLocaleString()} ₽</p></div><button class="btn btn-primary btn-sm" onclick="openBookingModal(${c.id})">Записаться</button><button class="btn btn-outline btn-sm" onclick="toggleFavorite(${c.id})">Удалить</button></div>`).join(''); }
+function renderProfileCourses() { 
+    const container = document.getElementById('myCoursesList'); 
+    if(!container) return; 
+    const enrolled = getCourses().filter(crs => currentUser.enrolledCourses?.includes(crs.id)); 
+    if(!enrolled.length) { container.innerHTML = '<div class="empty-state">У вас пока нет записанных курсов</div>'; return; } 
+    container.innerHTML = enrolled.map(crs => { 
+        const progress = currentUser.lessonProgress?.[crs.id] || 0; 
+        const total = crs.lessons?.length || 1; 
+        const percent = (progress / total) * 100; 
+        return `<div class="profile-list-item"><div><h4>${crs.title}</h4><p>${crs.instructor} • ${crs.duration}</p><div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div><span>Прогресс: ${progress}/${total} уроков</span></div><div><span class="course-price">${crs.price.toLocaleString()} ₽</span><button class="btn btn-primary btn-sm" onclick="continueCourse(${crs.id})">Продолжить</button>${progress === total ? `<button class="btn btn-outline btn-sm" onclick="generateCertificate('${crs.title}')">Сертификат</button>` : ''}</div></div>`; 
+    }).join(''); 
+}
+
+function renderProfileBookings() { 
+    const container = document.getElementById('myBookingsList'); 
+    if(!container) return; 
+    const bookings = getBookings().filter(b => b.userId === currentUser.id); 
+    if(!bookings.length) { container.innerHTML = '<div class="empty-state">У вас пока нет записей</div>'; return; } 
+    container.innerHTML = bookings.map(b => { 
+        const payment = getPayments().find(p => p.bookingId === b.id); 
+        const status = payment?.status === 'paid' ? 'Оплачено' : 'Ожидает оплаты'; 
+        return `<div class="profile-list-item"><div><h4>${b.type === 'course' ? 'Курс' : 'МК'}: ${b.title}</h4><p>Дата: ${b.date || 'уточняется'} • ${status}</p></div><div><span class="course-price">${b.price?.toLocaleString() || '—'} ₽</span>${payment?.status !== 'paid' ? `<button class="btn btn-primary btn-sm" onclick="initiatePayment(${b.id}, '${b.type}', ${b.itemId}, '${b.title}', ${b.price})">Оплатить</button>` : ''}</div></div>`; 
+    }).join(''); 
+}
+
+function renderProfileFavorites() { 
+    const container = document.getElementById('myFavoritesList'); 
+    if(!container) return; 
+    const favs = getCourses().filter(c => currentUser.favorites?.includes(c.id)); 
+    if(!favs.length) { container.innerHTML = '<div class="empty-state">Нет избранных курсов</div>'; return; } 
+    container.innerHTML = favs.map(c => `<div class="profile-list-item"><div><h4>${c.title}</h4><p>${c.price.toLocaleString()} ₽</p></div><button class="btn btn-primary btn-sm" onclick="openBookingModal(${c.id})">Записаться</button><button class="btn btn-outline btn-sm" onclick="toggleFavorite(${c.id})">Удалить</button></div>`).join(''); 
+}
 
 // ========== ЗАПИСЬ И ОПЛАТА ==========
 function openBookingModal(courseId = null) {
@@ -977,7 +1074,11 @@ function setupEventListeners() {
 }
 
 // ========== ЗАПУСК ==========
-function init() {
+async function init() {
+    // Сначала загружаем данные из Supabase
+    await loadFromSupabase();
+    
+    // Потом всё остальное
     initStorage();
     initTheme();
     initMobileMenu();
@@ -987,6 +1088,7 @@ function init() {
     attachGlobalCardHandler();
     setupEventListeners();
     initScrollHeader();
+    
     const savedUser = localStorage.getItem('currentUser');
     if(savedUser) currentUser = JSON.parse(savedUser);
     updateAuthUI();
@@ -1000,8 +1102,7 @@ function init() {
     setTimeout(() => { const p = document.getElementById('preloader'); if(p) p.remove(); }, 500);
 }
 
-// ЗАПУСКАЕМ ВСЁ
-init();
+document.addEventListener('DOMContentLoaded', init);
 
 // Глобальные функции
 window.navigateTo = navigateTo;
