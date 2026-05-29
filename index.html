@@ -5,33 +5,684 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SkillWay | Образовательная платформа</title>
     <meta name="description" content="SkillWay — платформа для записи на курсы и мастер-классы">
-    <meta name="theme-color" content="#ffffff">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        #preloader { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s; z-index:10000; }
-        .preloader-spinner { width:40px; height:40px; border:2px solid var(--border); border-top-color:var(--primary-dark); border-radius:50%; animation:spin 0.6s linear infinite; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-        .course-image img, .hero-image { width:100%; height:100%; object-fit:cover; display:block; }
+        :root {
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --primary: #2dd4bf;
+            --primary-dark: #14b8a6;
+            --primary-light: #ccfbf1;
+            --primary-soft: #f0fdfa;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow: 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05);
+            --transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --primary: #2dd4bf;
+            --primary-dark: #14b8a6;
+            --primary-soft: #134e4a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        h1, h2, h3, h4 { font-weight: 700; line-height: 1.3; letter-spacing: -0.02em; }
+        h1 { font-size: 48px; }
+        h2 { font-size: 32px; margin-bottom: 16px; }
+        h3 { font-size: 20px; }
+        .section-title { font-size: 32px; margin-bottom: 16px; color: var(--text-primary); }
+        .section-subtitle { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 48px; }
+        .section-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--primary-soft);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+        .btn-primary { background: var(--primary-dark); color: white; }
+        .btn-primary:hover { background: var(--primary); transform: translateY(-1px); color: var(--text-primary); }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary-dark);
+            color: var(--primary-dark);
+            background: var(--primary-soft);
+        }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+        .btn-block { width: 100%; }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 16px 0;
+            transition: var(--transition);
+        }
+        [data-theme="dark"] .header { background: rgba(15,23,42,0.95); }
+        .header-scrolled { padding: 10px 0; box-shadow: var(--shadow-md); }
+        .header-row { display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-size: 26px; font-weight: 800; text-decoration: none; color: var(--text-primary); cursor: pointer; }
+        .logo span { color: var(--primary-dark); }
+
+        .nav-menu { display: flex; gap: 32px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .nav-link:hover, .nav-link.active { color: var(--primary-dark); }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-dark);
+            border-radius: 2px;
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .theme-switch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .theme-switch:hover { background: var(--primary-dark); color: white; }
+
+        .auth-block { display: flex; gap: 12px; align-items: center; }
+        .user-name {
+            font-weight: 500;
+            font-size: 14px;
+            background: var(--primary-soft);
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: var(--primary-dark);
+        }
+
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .mobile-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+        .mobile-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(6px,6px); }
+        .mobile-toggle.active span:nth-child(2) { opacity: 0; }
+        .mobile-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(6px,-6px); }
+
+        .hero { padding: 140px 0 80px; background: var(--bg); }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--primary-soft);
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 24px;
+        }
+        .hero-title { font-size: 52px; margin-bottom: 24px; line-height: 1.2; color: var(--text-primary); }
+        .hero-accent { color: var(--primary-dark); }
+        .hero-description { font-size: 18px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6; }
+        .hero-buttons { display: flex; gap: 16px; margin-bottom: 48px; flex-wrap: wrap; }
+        .hero-stats { display: flex; gap: 48px; flex-wrap: wrap; }
+        .hero-stat { display: flex; flex-direction: column; }
+        .hero-stat-number { font-size: 42px; font-weight: 800; color: var(--primary-dark); line-height: 1; }
+        .hero-stat-label { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+        .hero-image-wrapper {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            height: 400px;
+            background: var(--primary-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-image-wrapper i { font-size: 80px; color: var(--primary-dark); }
+
+        .features { background: var(--surface); padding: 80px 0; }
+        .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+        .feature-card {
+            text-align: center;
+            padding: 32px 24px;
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-soft);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: var(--primary-dark);
+        }
+
+        .courses-grid, .masterclasses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 30px;
+        }
+        .course-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+        }
+        .course-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .course-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            background: var(--primary-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-fallback { font-size: 52px; color: var(--primary-dark); }
+        .course-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            z-index: 2;
+        }
+        .course-badge.hot { background: #ef4444; }
+        .course-content { padding: 22px; flex: 1; display: flex; flex-direction: column; }
+        .course-category {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        .course-title { font-size: 20px; margin-bottom: 10px; }
+        .course-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .course-meta { display: flex; gap: 16px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; }
+        .course-meta i { width: 16px; color: var(--primary-dark); }
+        .course-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+        .course-price { font-size: 22px; font-weight: 800; color: var(--primary-dark); }
+        .course-price-old { font-size: 12px; color: var(--text-muted); text-decoration: line-through; margin-left: 8px; }
+        .stars { color: #fbbf24; font-size: 13px; }
+        .favorite-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .favorite-btn:hover, .favorite-btn.active { background: #fee2e2; border-color: #ef4444; color: #ef4444; }
+
+        .admin-edit-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            z-index: 3;
+            display: flex;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .admin-edit-btn:hover { background: var(--primary-dark); }
+
+        .cta { padding: 80px 0; background: var(--surface); text-align: center; }
+        .cta-inner h2 { font-size: 36px; margin-bottom: 20px; }
+        .cta-inner p { font-size: 18px; margin-bottom: 32px; opacity: 0.8; }
+
+        .filter-section { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
+        .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-tab {
+            padding: 8px 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+        .filter-tab:hover, .filter-tab.active { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
+
+        .search-wrapper { position: relative; }
+        .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .search-wrapper input {
+            padding: 12px 40px 12px 45px;
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            background: var(--bg);
+            color: var(--text-primary);
+            width: 280px;
+            font-size: 14px;
+        }
+        .search-wrapper input:focus { outline: none; border-color: var(--primary-dark); box-shadow: 0 0 0 3px var(--primary-soft); }
+
+        .sort-filters {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            padding: 20px 25px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+        }
+        .sort-group { display: flex; flex-direction: column; gap: 8px; }
+        .sort-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .sort-select {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 160px;
+        }
+
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 40px; }
+        .pagination button {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .pagination button:hover { border-color: var(--primary-dark); color: var(--primary-dark); }
+        .pagination button.active { background: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+
+        .profile-wrapper { display: grid; grid-template-columns: 300px 1fr; gap: 40px; padding: 20px 0 60px; }
+        .profile-sidebar {
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--primary-soft);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 42px;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        .profile-stats { display: flex; justify-content: center; gap: 30px; margin: 24px 0; padding: 16px; background: var(--surface); border-radius: var(--radius); }
+        .profile-stats .stat-number { font-size: 28px; font-weight: 800; color: var(--primary-dark); }
+        .profile-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .profile-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .profile-tab.active { color: var(--primary-dark); border-bottom: 2px solid var(--primary-dark); margin-bottom: -2px; background: var(--primary-soft); }
+        .profile-tab-content { display: none; }
+        .profile-tab-content.active { display: block; }
+
+        .profile-list-item {
+            background: var(--card);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .progress-bar { width: 200px; height: 8px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: var(--primary-dark); width: 0%; border-radius: 10px; }
+
+        .admin-stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .stat-card { background: var(--card); padding: 28px; border-radius: var(--radius-lg); text-align: center; border: 1px solid var(--border); }
+        .stat-card h3 { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+        .stat-card p { font-size: 36px; font-weight: 800; color: var(--primary-dark); }
+
+        .reviews-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 40px; }
+        .reviews-summary { display: flex; align-items: center; gap: 24px; background: var(--primary-soft); padding: 20px 32px; border-radius: var(--radius-xl); }
+        .rating-number { font-size: 52px; font-weight: 800; color: var(--primary-dark); line-height: 1; }
+        .reviews-filter { margin-bottom: 30px; }
+        .reviews-filter-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+        .review-filter-btn {
+            padding: 8px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+        .review-filter-btn:hover, .review-filter-btn.active { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
+        .review-card {
+            background: var(--card);
+            padding: 28px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+        .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+        .review-name { font-weight: 700; font-size: 16px; }
+        .review-date { font-size: 12px; color: var(--text-muted); }
+        .review-text { font-size: 15px; line-height: 1.6; color: var(--text-secondary); }
+        .review-rating { display: flex; gap: 4px; font-size: 14px; }
+        .review-rating i { color: #fbbf24; }
+
+        .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 20px 0; }
+        .contacts-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        .contact-card {
+            background: var(--card);
+            padding: 28px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .contact-icon { width: 56px; height: 56px; background: var(--primary-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 24px; color: var(--primary-dark); }
+        .contacts-form { background: var(--card); padding: 36px; border-radius: var(--radius-xl); border: 1px solid var(--border); }
+        .contacts-form input, .contacts-form textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-window {
+            background: var(--card);
+            border-radius: 32px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-xl);
+        }
+        .modal-window-large { max-width: 680px; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .modal-close:hover { color: var(--primary-dark); background: var(--surface); transform: rotate(90deg); }
+        .modal-body { padding: 40px; }
+        .modal-body h2 { text-align: center; margin-bottom: 32px; }
+        .modal-body input, .modal-body select, .modal-body textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .rating-select { display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; }
+        .rating-select span { font-size: 40px; cursor: pointer; color: #cbd5e1; transition: var(--transition); }
+        .rating-select span:hover { transform: scale(1.15); color: #fbbf24; }
+        .rating-select span.active { color: #fbbf24; }
+
+        .notification {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--primary-dark);
+            color: white;
+            border-radius: 60px;
+            transform: translateX(150%);
+            transition: transform 0.3s cubic-bezier(0.68,-0.55,0.265,1.55);
+            z-index: 3000;
+            box-shadow: var(--shadow-lg);
+        }
+        .notification.show { transform: translateX(0); }
+        .notification-inner { padding: 14px 28px; display: flex; align-items: center; gap: 12px; font-weight: 500; }
+
+        .page { display: none; padding-top: 80px; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .section { padding: 80px 0; }
+
+        .footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; margin-bottom: 40px; }
+        .footer-logo { font-size: 26px; font-weight: 800; margin-bottom: 20px; }
+        .footer-logo span { color: var(--primary-dark); }
+        .footer-links a { display: block; color: var(--text-muted); text-decoration: none; font-size: 14px; margin-bottom: 12px; cursor: pointer; }
+        .footer-links a:hover { color: var(--primary-dark); }
+        .footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+
+        .empty-state { text-align: center; padding: 60px; color: var(--text-muted); font-size: 16px; }
+
+        @media (max-width: 1024px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .profile-wrapper { grid-template-columns: 1fr; }
+            .contacts-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: var(--card);
+                padding: 24px;
+                border-bottom: 1px solid var(--border);
+                gap: 18px;
+                z-index: 999;
+            }
+            .nav-menu.active { display: flex; }
+            .mobile-toggle { display: flex; }
+            .hero-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-visual { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .filter-section { flex-direction: column; align-items: stretch; }
+            .sort-filters { flex-direction: column; align-items: stretch; }
+            .sort-select { width: 100%; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .reviews-header { flex-direction: column; align-items: stretch; }
+            .reviews-summary { justify-content: center; }
+        }
     </style>
 </head>
 <body>
 
-<div id="preloader"><div class="preloader-spinner"></div></div>
+<div id="preloader" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center;">
+    <div class="preloader-spinner" style="width:40px; height:40px; border:2px solid var(--border); border-top-color:var(--primary-dark); border-radius:50%; animation:spin 0.6s linear infinite;"></div>
+</div>
+<style>@keyframes spin { to { transform:rotate(360deg); } }</style>
 
 <header class="header" id="header">
     <div class="container">
         <div class="header-row">
-            <a href="#" class="logo" onclick="navigateTo('home'); return false;">Skill<span>Way</span></a>
+            <div class="logo" onclick="navigateTo('home')">Skill<span>Way</span></div>
             <nav class="nav-menu" id="navMenu">
-                <a href="#" onclick="navigateTo('home'); return false;" class="nav-link active">Главная</a>
-                <a href="#" onclick="navigateTo('courses'); return false;" class="nav-link">Курсы</a>
-                <a href="#" onclick="navigateTo('masterclasses'); return false;" class="nav-link">Мастер-классы</a>
-                <a href="#" onclick="navigateTo('about'); return false;" class="nav-link">О нас</a>
-                <a href="#" onclick="navigateTo('reviews'); return false;" class="nav-link">Отзывы</a>
-                <a href="#" onclick="navigateTo('contacts'); return false;" class="nav-link">Контакты</a>
-                <a href="#" onclick="navigateTo('support'); return false;" class="nav-link">Поддержка</a>
+                <div class="nav-link active" onclick="navigateTo('home')">Главная</div>
+                <div class="nav-link" onclick="navigateTo('courses')">Курсы</div>
+                <div class="nav-link" onclick="navigateTo('masterclasses')">Мастер-классы</div>
+                <div class="nav-link" onclick="navigateTo('about')">О нас</div>
+                <div class="nav-link" onclick="navigateTo('reviews')">Отзывы</div>
+                <div class="nav-link" onclick="navigateTo('contacts')">Контакты</div>
+                <div class="nav-link" onclick="navigateTo('support')">Поддержка</div>
             </nav>
             <div class="header-actions">
                 <button class="theme-switch" id="themeSwitch"><i class="fas fa-moon"></i></button>
@@ -43,7 +694,7 @@
 </header>
 
 <main>
-    <!-- Главная страница -->
+    <!-- Главная -->
     <div id="home-page" class="page active">
         <section class="hero">
             <div class="container">
@@ -51,7 +702,7 @@
                     <div class="hero-content">
                         <div class="hero-badge">Онлайн-запись на обучение</div>
                         <h1 class="hero-title">Записывайтесь на <span class="hero-accent">курсы и мастер-классы</span> онлайн</h1>
-                        <p class="hero-description">SkillWay — платформа для удобной записи на образовательные курсы и мастер-классы от ведущих экспертов. Выбирайте программу, оформляйте заявку и начинайте обучение.</p>
+                        <p class="hero-description">SkillWay — платформа для удобной записи на образовательные курсы и мастер-классы от ведущих экспертов.</p>
                         <div class="hero-buttons">
                             <button class="btn btn-primary" onclick="navigateTo('courses')"><i class="fas fa-graduation-cap"></i> Записаться на курс</button>
                             <button class="btn btn-outline" onclick="navigateTo('masterclasses')"><i class="fas fa-chalkboard-user"></i> Мастер-классы</button>
@@ -60,24 +711,18 @@
                     </div>
                     <div class="hero-visual">
                         <div class="hero-image-wrapper">
-                            <img src="images/hero-img.jpg" alt="SkillWay обучение" class="hero-image" onerror="this.src='https://placehold.co/600x450/2dd4bf/ffffff?text=SkillWay'">
-                            <div class="hero-stats-card">
-                                <div class="stat-item"><i class="fas fa-video"></i><span>150+</span><small>курсов</small></div>
-                                <div class="stat-item"><i class="fas fa-users"></i><span>10k+</span><small>студентов</small></div>
-                                <div class="stat-item"><i class="fas fa-star"></i><span>4.9</span><small>рейтинг</small></div>
-                            </div>
+                            <i class="fas fa-graduation-cap"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="section features">
+        <section class="features">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag">Почему выбирают нас</span>
                     <h2 class="section-title">Преимущества записи через SkillWay</h2>
-                    <p class="section-subtitle">Мы создали удобную систему для поиска и записи на обучение</p>
                 </div>
                 <div class="features-grid">
                     <div class="feature-card"><div class="feature-icon"><i class="fas fa-mouse-pointer"></i></div><h3>Удобная запись</h3><p>Оформляйте заявку на обучение в несколько кликов</p></div>
@@ -90,58 +735,31 @@
 
         <section class="section">
             <div class="container">
-                <div class="section-header"><span class="section-tag">Рекомендуем</span><h2 class="section-title">Популярные курсы</h2><p class="section-subtitle">Тысячи студентов уже выбрали эти программы</p></div>
+                <div class="section-header"><span class="section-tag">Рекомендуем</span><h2 class="section-title">Популярные курсы</h2></div>
                 <div class="courses-grid" id="featuredCourses"></div>
             </div>
         </section>
 
-        <section class="section cta">
+        <section class="cta">
             <div class="container">
-                <div class="cta-inner"><h2>Готовы записаться на обучение?</h2><p>Выберите курс или мастер-класс и оформите заявку в личном кабинете</p><button class="btn btn-primary" onclick="navigateTo('courses')">Каталог курсов</button></div>
+                <div class="cta-inner"><h2>Готовы записаться на обучение?</h2><p>Выберите курс или мастер-класс и оформите заявку</p><button class="btn btn-primary" onclick="navigateTo('courses')">Каталог курсов</button></div>
             </div>
         </section>
     </div>
 
-    <!-- Каталог курсов -->
+    <!-- Курсы -->
     <div id="courses-page" class="page">
         <section class="section">
             <div class="container">
                 <div class="section-header"><h2 class="section-title">Каталог курсов</h2><p class="section-subtitle">Выберите программу обучения и оформите заявку</p></div>
                 <div class="filter-section">
                     <div class="filter-tabs" id="filterTabs"></div>
-                    <div class="search-wrapper"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Поиск курсов..."><button class="search-clear" id="searchClear">✕</button></div>
+                    <div class="search-wrapper"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Поиск курсов..."></div>
                 </div>
                 <div class="sort-filters">
-                    <div class="sort-group">
-                        <label><i class="fas fa-tag"></i> Цена</label>
-                        <select id="priceSelect" class="sort-select">
-                            <option value="all">Любая</option>
-                            <option value="0-10000">до 10 000 ₽</option>
-                            <option value="10000-30000">10 000 - 30 000 ₽</option>
-                            <option value="30000-50000">30 000 - 50 000 ₽</option>
-                            <option value="50000+">от 50 000 ₽</option>
-                        </select>
-                    </div>
-                    <div class="sort-group">
-                        <label><i class="fas fa-star"></i> Рейтинг</label>
-                        <select id="ratingSelectFilter" class="sort-select">
-                            <option value="0">Любой</option>
-                            <option value="4.5">4.5+ ★</option>
-                            <option value="4.0">4.0+ ★</option>
-                            <option value="3.5">3.5+ ★</option>
-                        </select>
-                    </div>
-                    <div class="sort-group">
-                        <label><i class="fas fa-arrow-down-wide-short"></i> Сортировка</label>
-                        <select id="sortBySelect" class="sort-select">
-                            <option value="default">По умолчанию</option>
-                            <option value="price_asc">Цена: сначала дешёвые</option>
-                            <option value="price_desc">Цена: сначала дорогие</option>
-                            <option value="rating_desc">Рейтинг: сначала высокие</option>
-                            <option value="rating_asc">Рейтинг: сначала низкие</option>
-                            <option value="popular">Популярность</option>
-                        </select>
-                    </div>
+                    <div class="sort-group"><label><i class="fas fa-tag"></i> Цена</label><select id="priceSelect" class="sort-select"><option value="all">Любая</option><option value="0-10000">до 10 000 ₽</option><option value="10000-30000">10 000 - 30 000 ₽</option><option value="30000-50000">30 000 - 50 000 ₽</option><option value="50000+">от 50 000 ₽</option></select></div>
+                    <div class="sort-group"><label><i class="fas fa-star"></i> Рейтинг</label><select id="ratingSelectFilter" class="sort-select"><option value="0">Любой</option><option value="4.5">4.5+ ★</option><option value="4.0">4.0+ ★</option></select></div>
+                    <div class="sort-group"><label><i class="fas fa-arrow-down-wide-short"></i> Сортировка</label><select id="sortBySelect" class="sort-select"><option value="default">По умолчанию</option><option value="price_asc">Цена: сначала дешёвые</option><option value="price_desc">Цена: сначала дорогие</option><option value="rating_desc">Рейтинг: сначала высокие</option><option value="popular">Популярность</option></select></div>
                     <button class="btn btn-outline btn-sm" id="resetFilters"><i class="fas fa-undo-alt"></i> Сбросить</button>
                 </div>
                 <div class="courses-grid" id="allCourses"></div>
@@ -164,41 +782,14 @@
     <div id="about-page" class="page">
         <section class="section">
             <div class="container">
-                <div class="about-hero">
-                    <h1>О платформе SkillWay</h1>
-                    <p>Современный сервис для записи на образовательные программы</p>
-                </div>
+                <div class="about-hero"><h1>О платформе SkillWay</h1><p>Современный сервис для записи на образовательные программы</p></div>
                 <div class="stats-row" id="aboutStats"></div>
-                <div class="about-mission">
-                    <div class="mission-icon"><i class="fas fa-bullseye"></i></div>
-                    <h2>Наша миссия</h2>
-                    <p>Сделать качественное образование доступным для каждого, кто стремится развиваться и достигать новых высот в своей карьере и жизни.</p>
-                </div>
-                <div class="about-values">
-                    <h3>Наши ценности</h3>
-                    <div class="values-grid">
-                        <div class="value-card"><i class="fas fa-heart"></i><span>Доверие</span><p>Мы ценим честность и открытость</p></div>
-                        <div class="value-card"><i class="fas fa-rocket"></i><span>Развитие</span><p>Постоянно совершенствуем платформу</p></div>
-                        <div class="value-card"><i class="fas fa-users"></i><span>Сообщество</span><p>Создаём среду для обмена знаниями</p></div>
-                        <div class="value-card"><i class="fas fa-star"></i><span>Качество</span><p>Отбираем лучшие образовательные программы</p></div>
-                    </div>
-                </div>
-                <div class="about-history">
-                    <div class="history-content">
-                        <h3>Как всё начиналось</h3>
-                        <p>SkillWay был основан в 2020 году группой энтузиастов, которые верили, что образование может быть удобным, доступным и эффективным. Сегодня это полноценная экосистема для профессионального развития, объединяющая тысячи студентов и десятки экспертов.</p>
-                        <div class="history-numbers">
-                            <div><span>5+</span><br>лет на рынке</div>
-                            <div><span>120+</span><br>экспертов</div>
-                            <div><span>10k+</span><br>выпускников</div>
-                        </div>
-                    </div>
-                </div>
+                <div class="about-mission"><div class="mission-icon"><i class="fas fa-bullseye"></i></div><h2>Наша миссия</h2><p>Сделать качественное образование доступным для каждого</p></div>
             </div>
         </section>
     </div>
 
-    <!-- Отзывы (без статических карточек) -->
+    <!-- Отзывы -->
     <div id="reviews-page" class="page">
         <section class="section">
             <div class="container">
@@ -206,18 +797,13 @@
                     <div class="reviews-summary" id="reviewsSummary"></div>
                     <button class="btn btn-primary" onclick="openReviewModal()"><i class="fas fa-pen"></i> Написать отзыв</button>
                 </div>
-                
-                <!-- Блок со статическими карточками УДАЛЁН -->
-                
                 <div class="reviews-filter">
                     <div class="reviews-filter-buttons">
                         <button class="review-filter-btn active" data-filter="all">Все</button>
                         <button class="review-filter-btn" data-filter="5">5 ★</button>
                         <button class="review-filter-btn" data-filter="4">4+ ★</button>
-                        <button class="review-filter-btn" data-filter="3">3+ ★</button>
                     </div>
                 </div>
-                
                 <div class="reviews-grid" id="reviewsGrid"></div>
                 <div class="pagination" id="reviewsPagination"></div>
             </div>
@@ -228,60 +814,21 @@
     <div id="contacts-page" class="page">
         <section class="section">
             <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Свяжитесь с нами</h2>
-                    <p class="section-subtitle">Мы всегда на связи и готовы ответить на ваши вопросы</p>
-                </div>
-                
+                <div class="section-header"><h2 class="section-title">Свяжитесь с нами</h2></div>
                 <div class="contacts-grid">
                     <div class="contacts-info">
-                        <div class="contact-card">
-                            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <h3>Офис</h3>
-                            <p>Москва, ул. Тверская, 25</p>
-                            <span class="contact-detail">м. Тверская, выход №7</span>
-                        </div>
-                        <div class="contact-card">
-                            <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
-                            <h3>Телефон</h3>
-                            <p>+7 (495) 123-45-67</p>
-                            <span class="contact-detail">Ежедневно с 9:00 до 20:00</span>
-                        </div>
-                        <div class="contact-card">
-                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-                            <h3>Email</h3>
-                            <p>info@skillway.ru</p>
-                            <span class="contact-detail">Ответ в течение 24 часов</span>
-                        </div>
-                        <div class="contact-card">
-                            <div class="contact-icon"><i class="fab fa-telegram"></i></div>
-                            <h3>Telegram</h3>
-                            <p>@skillway_support</p>
-                            <span class="contact-detail">Быстрая поддержка</span>
-                        </div>
+                        <div class="contact-card"><div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div><h3>Офис</h3><p>Москва, ул. Тверская, 25</p></div>
+                        <div class="contact-card"><div class="contact-icon"><i class="fas fa-phone-alt"></i></div><h3>Телефон</h3><p>+7 (495) 123-45-67</p></div>
+                        <div class="contact-card"><div class="contact-icon"><i class="fas fa-envelope"></i></div><h3>Email</h3><p>info@skillway.ru</p></div>
+                        <div class="contact-card"><div class="contact-icon"><i class="fab fa-telegram"></i></div><h3>Telegram</h3><p>@skillway_support</p></div>
                     </div>
-                    
                     <form class="contacts-form" id="contactForm">
                         <h3>Написать нам</h3>
-                        <div class="form-row">
-                            <input type="text" placeholder="Ваше имя" required>
-                            <input type="email" placeholder="Email" required>
-                        </div>
-                        <input type="text" placeholder="Тема сообщения">
-                        <textarea rows="5" placeholder="Сообщение" required></textarea>
-                        <button type="submit" class="btn btn-primary btn-block">Отправить сообщение</button>
-                        <p class="form-note">Нажимая на кнопку, вы соглашаетесь с политикой обработки данных</p>
+                        <input type="text" placeholder="Ваше имя" required>
+                        <input type="email" placeholder="Email" required>
+                        <textarea rows="4" placeholder="Сообщение" required></textarea>
+                        <button type="submit" class="btn btn-primary btn-block">Отправить</button>
                     </form>
-                </div>
-                
-                <div class="map-section">
-                    <h3>Как нас найти</h3>
-                    <div class="map-placeholder">
-                        <div class="map-overlay">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>г. Москва, ул. Тверская, 25</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -293,13 +840,10 @@
             <div class="container">
                 <div class="profile-wrapper">
                     <div class="profile-sidebar">
-                        <div class="profile-avatar" id="profileAvatar"></div>
+                        <div class="profile-avatar" id="profileAvatar">?</div>
                         <h3 id="profileName"></h3>
                         <p id="profileEmail"></p>
-                        <div class="profile-stats">
-                            <div><div class="stat-number" id="profileCoursesCount">0</div><span>Курсов</span></div>
-                            <div><div class="stat-number" id="profileBookingsCount">0</div><span>Записей</span></div>
-                        </div>
+                        <div class="profile-stats"><div><div class="stat-number" id="profileCoursesCount">0</div><span>Курсов</span></div><div><div class="stat-number" id="profileBookingsCount">0</div><span>Записей</span></div></div>
                         <button class="btn btn-outline btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
                     </div>
                     <div class="profile-main">
@@ -316,10 +860,9 @@
                             <div class="admin-stats-cards" id="profileAdminStats"></div>
                             <div class="admin-quick-actions">
                                 <h4>Быстрое управление</h4>
-                                <div class="admin-actions-grid">
+                                <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
                                     <button class="btn btn-primary btn-sm" onclick="openAddCourseModal()"><i class="fas fa-plus"></i> Добавить курс</button>
                                     <button class="btn btn-primary btn-sm" onclick="openAddMasterclassModal()"><i class="fas fa-plus"></i> Добавить МК</button>
-                                    <button class="btn btn-outline btn-sm" onclick="openFullAdminPanel()"><i class="fas fa-cog"></i> Полная админ-панель</button>
                                 </div>
                             </div>
                         </div>
@@ -329,58 +872,29 @@
         </section>
     </div>
 
-    <!-- Чат поддержки -->
+    <!-- Поддержка -->
     <div id="support-page" class="page">
         <section class="section">
             <div class="container">
                 <div class="section-header"><h2 class="section-title">Чат поддержки</h2><p class="section-subtitle">Поможем с записью на курсы</p></div>
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input-area">
-                        <textarea id="chatMessageInput" placeholder="Напишите ваше сообщение..." rows="2"></textarea>
-                        <button class="btn btn-primary" id="sendChatMessage"><i class="fas fa-paper-plane"></i> Отправить</button>
+                <div class="chat-container" style="background:var(--card); border-radius:16px; border:1px solid var(--border); overflow:hidden;">
+                    <div class="chat-messages" id="chatMessages" style="height:400px; overflow-y:auto; padding:20px;"></div>
+                    <div class="chat-input-area" style="display:flex; gap:12px; padding:20px; border-top:1px solid var(--border);">
+                        <textarea id="chatMessageInput" placeholder="Напишите ваше сообщение..." rows="2" style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--bg);"></textarea>
+                        <button class="btn btn-primary" id="sendChatMessage">Отправить</button>
                     </div>
                 </div>
             </div>
         </section>
-    </div>
-
-    <!-- Полная админ-панель -->
-    <div id="admin-page" class="page">
-        <section class="section"><div class="container">
-            <div class="section-header"><h2 class="section-title">Админ панель</h2><p class="section-subtitle">Управление платформой</p></div>
-            <div class="admin-tabs">
-                <button class="admin-tab active" data-admin-tab="dashboard">Обзор</button>
-                <button class="admin-tab" data-admin-tab="courses">Курсы</button>
-                <button class="admin-tab" data-admin-tab="masterclasses">МК</button>
-                <button class="admin-tab" data-admin-tab="bookings">Записи</button>
-                <button class="admin-tab" data-admin-tab="users">Пользователи</button>
-                <button class="admin-tab" data-admin-tab="support">Сообщения</button>
-            </div>
-            <div id="adminDashboardTab" class="admin-tab-content active">
-                <div class="stats-cards">
-                    <div class="stat-card"><h3>Студентов</h3><p id="adminTotalStudents">0</p></div>
-                    <div class="stat-card"><h3>Выручка</h3><p id="adminTotalRevenue">0 ₽</p></div>
-                    <div class="stat-card"><h3>Курсов</h3><p id="adminTotalCourses">0</p></div>
-                    <div class="stat-card"><h3>МК</h3><p id="adminTotalMasterclasses">0</p></div>
-                </div>
-                <div><h3>Популярные курсы</h3><div id="popularCoursesList"></div></div>
-            </div>
-            <div id="adminCoursesTab" class="admin-tab-content"><div id="adminPanelCourses"></div><div class="courses-grid" id="adminCoursesList"></div></div>
-            <div id="adminMasterclassesTab" class="admin-tab-content"><div id="adminPanelMasterclasses"></div><div class="masterclasses-grid" id="adminMasterclassesList"></div></div>
-            <div id="adminBookingsTab" class="admin-tab-content"><div id="adminBookingsList"></div></div>
-            <div id="adminUsersTab" class="admin-tab-content"><div id="adminUsersList"></div></div>
-            <div id="adminSupportTab" class="admin-tab-content"><div id="adminSupportMessages"></div></div>
-        </div></section>
     </div>
 </main>
 
 <footer class="footer">
     <div class="container">
         <div class="footer-grid">
-            <div><div class="footer-logo">Skill<span>Way</span></div><p class="footer-desc">Платформа для записи на образовательные курсы и мастер-классы</p><div class="footer-social"><a href="#"><i class="fab fa-telegram"></i></a><a href="#"><i class="fab fa-vk"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
-            <div class="footer-links"><h4>Обучение</h4><a onclick="navigateTo('courses')">Курсы</a><a onclick="navigateTo('masterclasses')">Мастер-классы</a></div>
-            <div class="footer-links"><h4>О компании</h4><a onclick="navigateTo('about')">О нас</a><a onclick="navigateTo('reviews')">Отзывы</a><a onclick="navigateTo('contacts')">Контакты</a></div>
+            <div><div class="footer-logo">Skill<span>Way</span></div><p>Платформа для записи на образовательные курсы</p></div>
+            <div class="footer-links"><h4>Обучение</h4><div onclick="navigateTo('courses')">Курсы</div><div onclick="navigateTo('masterclasses')">Мастер-классы</div></div>
+            <div class="footer-links"><h4>О компании</h4><div onclick="navigateTo('about')">О нас</div><div onclick="navigateTo('reviews')">Отзывы</div></div>
             <div class="footer-contacts"><h4>Контакты</h4><p><i class="fas fa-phone"></i> +7 (495) 123-45-67</p><p><i class="fas fa-envelope"></i> info@skillway.ru</p></div>
         </div>
         <div class="footer-bottom"><p>&copy; 2025 SkillWay. Система онлайн-записи на обучение.</p></div>
@@ -388,66 +902,17 @@
 </footer>
 
 <!-- Модальные окна -->
-<div id="loginModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('loginModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-sign-in-alt"></i></div><h2>Вход в аккаунт</h2><form id="loginForm"><input type="email" id="loginEmail" placeholder="Email" required><input type="password" id="loginPassword" placeholder="Пароль" required><button type="submit" class="btn btn-primary btn-block">Войти</button><div class="modal-footer"><a href="#" id="forgotPasswordLink">Забыли пароль?</a><span> | </span><a href="#" onclick="closeModal('loginModal');openModal('registerModal')">Регистрация</a></div></form></div></div></div>
+<div id="loginModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('loginModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-sign-in-alt"></i></div><h2>Вход в аккаунт</h2><form id="loginForm"><input type="email" id="loginEmail" placeholder="Email" required><input type="password" id="loginPassword" placeholder="Пароль" required><button type="submit" class="btn btn-primary btn-block">Войти</button></form></div></div></div>
 
 <div id="registerModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('registerModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-user-plus"></i></div><h2>Регистрация</h2><form id="registerForm"><input type="text" id="regName" placeholder="Имя" required><input type="email" id="regEmail" placeholder="Email" required><input type="password" id="regPassword" placeholder="Пароль (мин. 6 символов)" required><button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button></form></div></div></div>
 
-<div id="resetPasswordModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('resetPasswordModal')">&times;</button><div class="modal-body"><h2>Сброс пароля</h2><form id="resetRequestForm"><input type="email" id="resetEmail" placeholder="Ваш Email" required><div id="resetCodeSection" style="display:none"><input type="text" id="resetCode" placeholder="Код из письма"><input type="password" id="resetNewPass" placeholder="Новый пароль"><button type="button" id="submitResetBtn" class="btn btn-primary btn-block">Изменить пароль</button></div><button type="submit" class="btn btn-primary btn-block">Отправить код</button></form></div></div></div>
-
 <div id="bookingModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('bookingModal')">&times;</button><div class="modal-body"><h2>Запись на курс</h2><form id="bookingForm"><select id="bookingCourseSelect" required><option value="">Выберите курс</option></select><input type="text" id="bookingName" placeholder="Ваше имя" required><input type="email" id="bookingEmail" placeholder="Email" required><input type="tel" id="bookingPhone" placeholder="Телефон" required><button type="submit" class="btn btn-primary btn-block">Отправить заявку</button></form></div></div></div>
-
-<!-- Модальное окно оплаты с промокодом -->
-<div id="paymentModal" class="modal">
-    <div class="modal-window">
-        <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
-        <div class="modal-body">
-            <h2>Оплата</h2>
-            <div id="paymentCourseInfo" style="margin-bottom: 20px; padding: 12px; background: var(--surface); border-radius: var(--radius);"></div>
-            
-            <div class="promo-section">
-                <div class="promo-header" onclick="togglePromoSection()">
-                    <span><i class="fas fa-ticket-alt"></i> Есть промокод?</span>
-                    <button type="button" class="promo-toggle" id="promoToggleBtn">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-                <div class="promo-body" id="promoBody">
-                    <div class="promo-input-group">
-                        <input type="text" id="promoCodeInput" placeholder="Введите промокод">
-                        <button type="button" class="btn btn-outline" id="applyPromoBtn">Применить</button>
-                    </div>
-                    <div id="promoMessage" class="promo-message" style="display: none;"></div>
-                    <div id="availablePromos" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
-                        <small>Доступные промокоды: WELCOME10 (скидка 10% на первый курс), SKILLWAY20 (скидка 20% для новых пользователей)</small>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="priceBreakdown" style="margin: 16px 0; padding: 16px; background: var(--surface); border-radius: var(--radius);"></div>
-            
-            <form id="paymentForm">
-                <input type="text" placeholder="Номер карты" required>
-                <div class="form-row">
-                    <input type="text" placeholder="ММ/ГГ" required>
-                    <input type="text" placeholder="CVV" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Оплатить</button>
-            </form>
-        </div>
-    </div>
-</div>
 
 <div id="reviewModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('reviewModal')">&times;</button><div class="modal-body"><h2>Оставить отзыв</h2><form id="reviewForm"><input type="text" id="reviewName" placeholder="Ваше имя" required><div class="rating-select" id="ratingSelect"><span data-rating="1">★</span><span data-rating="2">★</span><span data-rating="3">★</span><span data-rating="4">★</span><span data-rating="5">★</span></div><input type="hidden" id="reviewRating" value="5"><textarea id="reviewText" rows="4" placeholder="Расскажите о вашем опыте..." required></textarea><button type="submit" class="btn btn-primary btn-block">Оставить отзыв</button></form></div></div></div>
 
-<div id="detailModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('detailModal')">&times;</button><div class="modal-body" id="detailModalBody"></div></div></div>
+<div id="addEditCourseModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('addEditCourseModal')">&times;</button><div class="modal-body"><h2 id="courseModalTitle">Курс</h2><form id="courseForm"><input type="hidden" id="editCourseId"><input type="text" id="courseTitle" placeholder="Название" required><select id="courseCategory"><option>Программирование</option><option>Дизайн</option><option>Маркетинг</option><option>Бизнес</option><option>Data Science</option></select><textarea id="courseDesc" placeholder="Краткое описание" rows="3"></textarea><input type="text" id="courseDuration" placeholder="Длительность"><input type="text" id="courseInstructor" placeholder="Преподаватель"><input type="number" id="coursePrice" placeholder="Цена" required><input type="number" id="courseOldPrice" placeholder="Старая цена"><textarea id="courseLongDesc" placeholder="Полное описание" rows="4"></textarea><button type="submit" class="btn btn-primary btn-block">Сохранить</button></form></div></div></div>
 
-<div id="certificateModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('certificateModal')">&times;</button><div class="modal-body" id="certificateContent"></div></div></div>
-
-<div id="addEditCourseModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('addEditCourseModal')">&times;</button><div class="modal-body"><h2 id="courseModalTitle">Курс</h2><form id="courseForm"><input type="hidden" id="editCourseId"><input type="text" id="courseTitle" placeholder="Название" required><select id="courseCategory"><option>Программирование</option><option>Дизайн</option><option>Маркетинг</option><option>Бизнес</option><option>Data Science</option></select><textarea id="courseDesc" placeholder="Краткое описание" required rows="3"></textarea><input type="text" id="courseDuration" placeholder="Длительность"><input type="text" id="courseInstructor" placeholder="Преподаватель"><input type="number" id="coursePrice" placeholder="Цена" required><input type="number" id="courseOldPrice" placeholder="Старая цена"><textarea id="courseLongDesc" placeholder="Полное описание" rows="4"></textarea><input type="text" id="courseImage" placeholder="URL картинки (опционально)"><button type="submit" class="btn btn-primary btn-block">Сохранить</button></form></div></div></div>
-
-<div id="addEditMasterclassModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('addEditMasterclassModal')">&times;</button><div class="modal-body"><h2 id="mcModalTitle">Мастер-класс</h2><form id="masterclassForm"><input type="hidden" id="editMcId"><input type="text" id="mcTitle" placeholder="Название" required><textarea id="mcDesc" placeholder="Описание" required rows="3"></textarea><input type="text" id="mcDuration" placeholder="Длительность"><input type="text" id="mcInstructor" placeholder="Ведущий"><input type="datetime-local" id="mcDatetime"><input type="number" id="mcPrice" placeholder="Цена" required><textarea id="mcLongDesc" placeholder="Полное описание" rows="4"></textarea><input type="text" id="mcImage" placeholder="URL картинки (опционально)"><button type="submit" class="btn btn-primary btn-block">Сохранить</button></form></div></div></div>
-
-<div id="promoModal" class="modal"><div class="modal-window"><button class="modal-close" onclick="closeModal('promoModal')">&times;</button><div class="modal-body"><div class="modal-icon"><i class="fas fa-gift"></i></div><h2>Активация промокода</h2><p style="text-align: center; margin-bottom: 20px;">Введите полученный промокод для активации скидки</p><input type="text" id="activatePromoInput" placeholder="Промокод"><button class="btn btn-primary btn-block" onclick="activatePromoCode()">Активировать</button></div></div></div>
+<div id="addEditMasterclassModal" class="modal"><div class="modal-window modal-window-large"><button class="modal-close" onclick="closeModal('addEditMasterclassModal')">&times;</button><div class="modal-body"><h2 id="mcModalTitle">Мастер-класс</h2><form id="masterclassForm"><input type="hidden" id="editMcId"><input type="text" id="mcTitle" placeholder="Название" required><textarea id="mcDesc" placeholder="Описание" rows="3"></textarea><input type="text" id="mcDuration" placeholder="Длительность"><input type="text" id="mcInstructor" placeholder="Ведущий"><input type="datetime-local" id="mcDatetime"><input type="number" id="mcPrice" placeholder="Цена" required><textarea id="mcLongDesc" placeholder="Полное описание" rows="4"></textarea><button type="submit" class="btn btn-primary btn-block">Сохранить</button></form></div></div></div>
 
 <div id="notification" class="notification"><div class="notification-inner"><i class="fas fa-check-circle"></i><span id="notificationText"></span></div></div>
 
